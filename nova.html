@@ -264,7 +264,8 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
-  .reveal,.stagger>*{opacity:1!important;transform:none!important;filter:none!important}
+  /* Reduce-motion: drop movement/blur but keep a gentle opacity fade for scroll reveals (vestibular-safe) */
+  .reveal,.stagger>*{transform:none!important;filter:none!important;transition:opacity .6s ease!important}
 }
 </style>
 </head>
@@ -557,7 +558,8 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(function(){ ticking=false; check(); }); } }
   addEventListener('scroll',onScroll,{passive:true});
   addEventListener('resize',onScroll,{passive:true});
-  check();                                   // reveal anything already on-screen right away
+  // Defer the first reveal by a paint so the entrance transition actually plays (not batched into the hidden state)
+  requestAnimationFrame(function(){ requestAnimationFrame(check); });
   addEventListener('load',function(){ setTimeout(check,80); });   // safety pass once layout settles
 
   var tgl=document.querySelector('.nav-toggle');

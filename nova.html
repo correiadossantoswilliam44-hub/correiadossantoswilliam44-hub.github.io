@@ -701,11 +701,11 @@ if (!reduced && !saveData) try {
     prog += (target-prog)*0.09; uniforms.uProgress.value=prog;
     mx+=(pmx-mx)*0.05; my+=(pmy-my)*0.05; uniforms.uPointer.value.set(mx,my);
     renderer.render(scene, camera);
-    if(!checked){                                    // FPS watchdog — kill the overlay if it can't hold 45fps
+    if(!checked){                                    // FPS watchdog — only fall back to the poster if the device truly can't cope
       const now=performance.now();
-      if(t0===0){ if(now>600) t0=now; }              // ignore the first 600ms of load jank
-      else { frames++; if(now-t0>1000){ checked=true;
-        if(frames/((now-t0)/1000) < 45){ disabled=true; try{renderer.dispose();}catch(e){} canvas.style.display='none'; return; }
+      if(t0===0){ if(now>1500) t0=now; }             // warm-up: skip the first 1.5s of load jank (shader compile, fonts, layout)
+      else { frames++; if(now-t0>2000){ checked=true; // then sample steady-state over a full 2s window
+        if(frames/((now-t0)/1000) < 30){ disabled=true; try{renderer.dispose();}catch(e){} canvas.style.display='none'; return; }
       }}
     }
     if(running) requestAnimationFrame(loop);

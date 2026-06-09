@@ -143,6 +143,13 @@ section{padding:100px 0;position:relative}
 .shot-logo{position:relative;z-index:1;max-width:130px;max-height:74px;object-fit:contain;filter:drop-shadow(0 4px 18px rgba(0,0,0,.7))}
 .live-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#23d5ab;letter-spacing:.05em;vertical-align:middle;margin-left:6px}
 @media(max-width:860px){.work-grid{grid-template-columns:1fr}}
+.sample-preview{position:relative;z-index:1;text-align:center;padding:0 20px}
+.sample-name{display:block;font-family:'Bricolage Grotesque';font-weight:800;font-size:23px;color:#fff;letter-spacing:-.02em;text-shadow:0 2px 16px rgba(0,0,0,.55)}
+.sample-line{display:block;font-size:11px;color:rgba(255,255,255,.92);margin-top:7px;letter-spacing:.02em;text-shadow:0 1px 10px rgba(0,0,0,.55)}
+.sample-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--violet);border:1px solid rgba(155,107,255,.45);border-radius:999px;padding:2px 8px;letter-spacing:.06em;vertical-align:middle;margin-left:6px}
+.shot-plumb{background:linear-gradient(135deg,#08203a,#0d4a7a 58%,#1e74c0)}
+.shot-roof{background:linear-gradient(135deg,#2a1207,#7a3410 55%,#c2632a)}
+.shot-hvac{background:linear-gradient(135deg,#06262b,#0a5a63 58%,#1fa3b8)}
 
 .testi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;max-width:980px;margin:0 auto}
 .testi-grid.single{grid-template-columns:1fr;max-width:620px}
@@ -293,13 +300,13 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
     <h1>Never <span class="grad">Miss a Lead</span> Again.</h1>
     <p class="sub">Get an AI-powered website and phone receptionist that captures every customer, <strong>live in 48 hours.</strong></p>
     <div class="hero-cta">
-      <a class="btn btn-glow" href="#contact">Start your ignition</a>
-      <a class="btn btn-ghost" href="#phases">See the journey</a>
+      <a class="btn btn-glow" href="#contact">Get Your AI Site in 48hrs</a>
+      <a class="btn btn-ghost" href="#phases">How it Works</a>
     </div>
     <div class="hero-stats">
       <div class="hstat"><span class="hnum">48hrs</span><span class="hlbl">Kickoff to live</span></div>
       <span class="hdiv"></span>
-      <div class="hstat"><span class="hnum">$0/mo</span><span class="hlbl">Plans start at</span></div>
+      <div class="hstat"><span class="hnum">100%</span><span class="hlbl">Calls answered</span></div>
       <span class="hdiv"></span>
       <div class="hstat"><span class="hnum">24/7</span><span class="hlbl">AI never sleeps</span></div>
     </div>
@@ -366,12 +373,38 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Our Work</span>
-      <h2>Real businesses, real results</h2>
-      <p>Don't take our word for it. Here's what local owners say after they ignited with Supernova.</p>
+      <h2>Sites built to get businesses found</h2>
+      <p>A live client site, plus sample designs for the trades we serve. The day you sign on, we build yours.</p>
     </div>
-    <!-- Real client testimonial. BEFORE PUBLISH: confirm the barber's real name and that
-         the quote is his actual words (FTC requires testimonials to be genuine). -->
-    <div class="testi-grid single stagger">
+    <!-- One LIVE real client (904 Blendz) + clearly-labeled SAMPLE design concepts.
+         The sample cards are our own design work, badged "SAMPLE" — not real clients.
+         Do NOT relabel them as real businesses or add fabricated testimonials/results. -->
+    <div class="work-grid stagger">
+      <a class="work-card live-card" href="https://correiadossantoswilliam44-hub.github.io/904blendz/" target="_blank" rel="noopener">
+        <div class="browser-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span class="url">904blendz.github.io</span></div>
+        <div class="shot-img" style="background-image:url('/work-904blendz.jpg')">
+          <img class="shot-logo" src="/work-904blendz-logo.png" alt="904 Blendz" loading="lazy"/>
+        </div>
+        <div class="work-meta"><h4>904 Blendz <span class="live-badge">● LIVE</span></h4><span>Barbershop · gallery + booking</span></div>
+      </a>
+      <div class="work-card">
+        <div class="browser-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span class="url">apexplumbing.com</span></div>
+        <div class="shot-img shot-plumb"><div class="sample-preview"><span class="sample-name">Apex Plumbing</span><span class="sample-line">24/7 Emergency Plumbing · Book in 60 Seconds</span></div></div>
+        <div class="work-meta"><h4>Apex Plumbing <span class="sample-badge">SAMPLE</span></h4><span>Plumbing · site concept</span></div>
+      </div>
+      <div class="work-card">
+        <div class="browser-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span class="url">summitroofing.com</span></div>
+        <div class="shot-img shot-roof"><div class="sample-preview"><span class="sample-name">Summit Roofing</span><span class="sample-line">Free Inspections · Storm-Damage Experts</span></div></div>
+        <div class="work-meta"><h4>Summit Roofing <span class="sample-badge">SAMPLE</span></h4><span>Roofing · site concept</span></div>
+      </div>
+      <div class="work-card">
+        <div class="browser-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span class="url">arctichvac.com</span></div>
+        <div class="shot-img shot-hvac"><div class="sample-preview"><span class="sample-name">Arctic Air HVAC</span><span class="sample-line">Heating &amp; Cooling · Same-Day Service</span></div></div>
+        <div class="work-meta"><h4>Arctic Air HVAC <span class="sample-badge">SAMPLE</span></h4><span>HVAC · site concept</span></div>
+      </div>
+    </div>
+    <!-- Real client testimonial (Jalen Gardner / 904 Blendz) — genuine quote, FTC-safe. -->
+    <div class="testi-grid single stagger" style="margin-top:46px">
       <div class="testi">
         <div class="testi-stars" aria-label="5 out of 5 stars"><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg></div>
         <p class="testi-quote">The AI receptionist booked 5 new jobs for me in the first week. I was losing those calls to voicemail before — now nothing slips through.</p>
@@ -425,7 +458,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
           <li><svg class="ic"><use href="#i-check"/></svg>Live in 48 hours</li>
           <li><svg class="ic"><use href="#i-check"/></svg>You own it 100%</li>
         </ul>
-        <a class="btn btn-ghost" href="#contact">Get started</a>
+        <a class="btn btn-ghost" href="#contact">Start Ignition</a>
       </div>
       <div class="price-card featured reveal">
         <div class="price-tag">MOST POPULAR</div>
@@ -440,7 +473,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
           <li><svg class="ic"><use href="#i-check"/></svg>Live call dashboard</li>
           <li><svg class="ic"><use href="#i-check"/></svg>Cancel anytime</li>
         </ul>
-        <a class="btn btn-glow" href="#contact">Ignite now</a>
+        <a class="btn btn-glow" href="#contact">Start Supernova</a>
       </div>
       <div class="price-card reveal">
         <div class="tier">REBIRTH</div>

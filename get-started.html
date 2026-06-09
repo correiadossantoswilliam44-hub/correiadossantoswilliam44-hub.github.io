@@ -29,10 +29,14 @@ a{color:inherit;text-decoration:none}
   radial-gradient(50% 50% at 88% 88%,rgba(205,80,175,.14),transparent 65%),
   var(--void)}
 .wrap{max-width:680px;margin:0 auto;padding:0 22px}
-header{padding:22px 0}
-.logo{display:inline-flex;align-items:center;gap:10px;font-family:'Bricolage Grotesque';font-weight:700;font-size:19px}
-.logo .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--violet));display:grid;place-items:center;font-size:15px;filter:drop-shadow(0 0 10px rgba(155,107,255,.5))}
-.back{float:right;color:var(--muted);font-size:14px;font-weight:500;margin-top:6px}
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(3,4,12,.55);border-bottom:1px solid var(--border)}
+header nav{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{display:flex;align-items:center;gap:11px}
+.logo-img{width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(155,107,255,.55))}
+.logo-word{display:inline-block;height:24px;aspect-ratio:1498/303;-webkit-mask:url(/supernova-wordmark.png) no-repeat center/contain;mask:url(/supernova-wordmark.png) no-repeat center/contain;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.92) 50%,transparent 62%),linear-gradient(120deg,#a93fd6,#7b4bd6 40%,#4d7cff);background-size:250% 100%,100% 100%;background-position:-160% 0,0 0;background-repeat:no-repeat;transition:transform .35s var(--e);will-change:transform,background-position}
+.logo:hover .logo-word{transform:scale(1.12);animation:wordshine .9s ease}
+@keyframes wordshine{from{background-position:-160% 0,0 0}to{background-position:260% 0,0 0}}
+.back{color:var(--muted);font-size:14px;font-weight:500}
 .back:hover{color:var(--text)}
 
 .intro{text-align:center;padding:18px 0 30px}
@@ -97,8 +101,10 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <header>
   <div class="wrap">
-    <a class="logo" href="/nova.html"><span class="mark">N</span> Supernova</a>
-    <a class="back" href="/nova.html">← Back to site</a>
+    <nav>
+      <a class="logo" href="/nova.html"><img class="logo-img" src="/dash-atom.png" alt=""/><span class="logo-word" role="img" aria-label="Supernova"></span></a>
+      <a class="back" href="/nova.html">← Back to site</a>
+    </nav>
   </div>
 </header>
 

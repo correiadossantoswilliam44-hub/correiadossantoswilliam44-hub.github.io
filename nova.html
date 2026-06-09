@@ -312,7 +312,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
         <a href="/about.html">About</a>
         <a class="btn btn-primary" href="/get-started.html" style="padding:10px 20px">Ignite Now</a>
       </div>
-      <button class="nav-toggle" aria-label="Menu"><svg class="ic"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button class="nav-toggle" aria-label="Menu" aria-expanded="false"><svg class="ic"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
     </nav>
   </div>
 </header>
@@ -563,10 +563,20 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   addEventListener('load',function(){ setTimeout(check,80); });   // safety pass once layout settles
 
   var tgl=document.querySelector('.nav-toggle');
-  if(tgl) tgl.addEventListener('click',function(){
-    var l=document.querySelector('.nav-links'); var open=l.style.display==='flex';
-    Object.assign(l.style,{display:open?'none':'flex',position:'absolute',top:'72px',left:'0',right:'0',flexDirection:'column',background:'var(--deep)',padding:'20px',borderBottom:'1px solid var(--border)',gap:'18px'});
-  });
+  var links=document.querySelector('.nav-links');
+  if(tgl && links){
+    var setOpen=function(open){
+      if(open){
+        Object.assign(links.style,{display:'flex',position:'absolute',top:'72px',left:'0',right:'0',flexDirection:'column',background:'var(--deep)',padding:'20px',borderBottom:'1px solid var(--border)',gap:'18px'});
+      } else {
+        links.style.cssText='';            // hand control back to the stylesheet (hidden on mobile, flex row on desktop) — also clears stale inline styles on resize
+      }
+      tgl.setAttribute('aria-expanded', open?'true':'false');
+    };
+    tgl.addEventListener('click',function(){ setOpen(links.style.display!=='flex'); });
+    // Close the menu after tapping a link so it doesn't keep covering the section you jumped to
+    links.addEventListener('click',function(e){ if(e.target.closest('a')) setOpen(false); });
+  }
 })();
 </script>
 

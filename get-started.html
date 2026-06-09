@@ -201,6 +201,60 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   <p class="alt" id="altCall">Prefer to just talk it through? <a href="https://calendly.com/correiadossantoswilliam44/30min" target="_blank" rel="noopener">Book a free 15-min call →</a></p>
 </main>
 
+<!-- Lead backend: when Supabase is configured (supabase-config.js), submissions are saved
+     to your database + the admin Lead Inbox. Until then — or if it errors — the form falls
+     back to the original FormSubmit email flow, so a lead is never lost. -->
+<script src="/supabase-config.js"></script>
+<script>
+(function(){
+  if(!window.NOVA_SUPABASE_READY) return;              // not wired up yet → native FormSubmit, no extra weight loaded
+  var lib=document.createElement('script');
+  lib.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  lib.onload=wire;
+  document.head.appendChild(lib);
+
+  function wire(){
+    var form=document.getElementById('leadForm');
+    var sb=window.supabase.createClient(window.NOVA_SUPABASE.url, window.NOVA_SUPABASE.anonKey);
+    var bypass=false;
+    form.addEventListener('submit', async function(e){
+      if(bypass) return;                                // second pass → submit natively to FormSubmit
+      e.preventDefault();
+      var btn=form.querySelector('button[type=submit]'), label=btn.textContent;
+      btn.disabled=true; btn.textContent='Sending…';
+      try{
+        var fd=new FormData(form);
+        // best-effort photo upload to private storage
+        var files=(form.querySelector('input[type=file]')||{}).files||[], paths=[];
+        for(var i=0;i<files.length;i++){
+          var f=files[i];
+          var path=Date.now()+'-'+Math.random().toString(36).slice(2)+'-'+f.name.replace(/[^\w.\-]+/g,'_');
+          var up=await sb.storage.from('lead-photos').upload(path, f, {contentType:f.type||'image/jpeg'});
+          if(!up.error) paths.push(path);
+        }
+        var ins=await sb.from('leads').insert({
+          business_name: fd.get('Business name'),
+          location:      fd.get('Location'),
+          trade:         fd.get('Trade / Service'),
+          phone:         fd.get('Phone'),
+          email:         fd.get('email'),
+          has_website:   fd.get('Has a website'),
+          current_site:  fd.get('Current website')||null,
+          notes:         fd.get('Anything else')||null,
+          photo_paths:   paths
+        });
+        if(ins.error) throw ins.error;
+        location.href=location.pathname+'?sent=1';      // reuse the existing success UI
+      }catch(err){
+        console.warn('Supabase save failed — falling back to email:', err);
+        bypass=true; btn.disabled=false; btn.textContent=label;
+        form.submit();                                  // FormSubmit so the lead still reaches you
+      }
+    });
+  }
+})();
+</script>
+
 <script>
 // Reveal the website-link field when "Yes — make it better" is chosen
 const yes=document.getElementById('hwYes'), no=document.getElementById('hwNo'), reveal=document.getElementById('urlReveal');

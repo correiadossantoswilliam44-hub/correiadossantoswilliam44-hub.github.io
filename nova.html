@@ -572,7 +572,11 @@ document.querySelector('.nav-toggle').addEventListener('click',()=>{
 </script>
 <script type="module">
 const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
-try {
+// Skip the WebGL nebula (and its ~600KB Three.js download) on phones/tablets, data-saver,
+// and reduced-motion — the CSS gradient + video carry the look there. Keeps scrolling buttery.
+const lowPower = matchMedia('(pointer:coarse)').matches || innerWidth < 760
+  || (navigator.connection && navigator.connection.saveData);
+if (!reduced && !lowPower) try {
   const THREE = await import('three');
   const canvas = document.getElementById('nova-fx');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, alpha:false, powerPreference:'high-performance' });
@@ -651,16 +655,25 @@ try {
   addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); uniforms.uRes.value.set(innerWidth*DPR, innerHeight*DPR); });
 
   if(reduced){ target=prog=0.30; }
-  const clock=new THREE.Clock(); let running=true;
+  const clock=new THREE.Clock();
+  let running=true, disabled=false, frames=0, t0=0, checked=false;
   function loop(){
+    if(disabled) return;
     uniforms.uTime.value += clock.getDelta();
     prog += (target-prog)*0.09; uniforms.uProgress.value=prog;
     mx+=(pmx-mx)*0.05; my+=(pmy-my)*0.05; uniforms.uPointer.value.set(mx,my);
     renderer.render(scene, camera);
-    if(!reduced && running) requestAnimationFrame(loop);
+    if(!checked){                                    // FPS watchdog — kill the overlay if it can't hold 45fps
+      const now=performance.now();
+      if(t0===0){ if(now>600) t0=now; }              // ignore the first 600ms of load jank
+      else { frames++; if(now-t0>1000){ checked=true;
+        if(frames/((now-t0)/1000) < 45){ disabled=true; try{renderer.dispose();}catch(e){} canvas.style.display='none'; return; }
+      }}
+    }
+    if(running) requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
-  document.addEventListener('visibilitychange', ()=>{ running=!document.hidden; if(running && !reduced) requestAnimationFrame(loop); });
+  document.addEventListener('visibilitychange', ()=>{ running=!document.hidden; if(running && !disabled) requestAnimationFrame(loop); });
 } catch(err){ console.warn('Nova GPU overlay unavailable:', err); }
 </script>
 

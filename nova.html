@@ -610,11 +610,11 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 </script>
 <script type="module">
 const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
-// Skip the WebGL nebula (and its ~600KB Three.js download) on phones/tablets, data-saver,
-// and reduced-motion — the CSS gradient + video carry the look there. Keeps scrolling buttery.
-const lowPower = matchMedia('(pointer:coarse)').matches || innerWidth < 760
-  || (navigator.connection && navigator.connection.saveData);
-if (!reduced && !lowPower) try {
+// The supernova shader now runs on phones too (per request). We still bail out for data-saver
+// and reduced-motion, drop the render resolution on small screens (DPR below), and rely on the
+// 45fps watchdog further down to auto-fall-back to the poster on any device that can't keep up.
+const saveData = !!(navigator.connection && navigator.connection.saveData);
+if (!reduced && !saveData) try {
   const THREE = await import('three');
   const canvas = document.getElementById('nova-fx');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, alpha:false, powerPreference:'high-performance' });

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Get Your Free Website Preview — Supernova</title>
+<meta name="description" content="Tell us about your business and we'll build you a free preview of your new website — live in 48 hours. No cost, no commitment."/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" type="image/svg+xml" href="/logo.svg"/>
+<script defer src="/cursor.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --void:#03040c;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.1);
+  --text:#eef2ff;--muted:#9aa6c8;--dim:#5a6488;
+  --blue:#4d7cff;--violet:#9b6bff;--core:#ffd76b;
+  --radius:16px;--e:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--void);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:'Bricolage Grotesque','Inter',sans-serif;line-height:1.06;letter-spacing:-.03em}
+a{color:inherit;text-decoration:none}
+.bg{position:fixed;inset:0;z-index:-1;background:
+  radial-gradient(55% 50% at 78% 18%,rgba(120,90,255,.22),transparent 65%),
+  radial-gradient(50% 45% at 14% 82%,rgba(40,160,185,.16),transparent 65%),
+  radial-gradient(50% 50% at 88% 88%,rgba(205,80,175,.14),transparent 65%),
+  var(--void)}
+.wrap{max-width:680px;margin:0 auto;padding:0 22px}
+header{padding:22px 0}
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:'Bricolage Grotesque';font-weight:700;font-size:19px}
+.logo .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--violet));display:grid;place-items:center;font-size:15px;filter:drop-shadow(0 0 10px rgba(155,107,255,.5))}
+.back{float:right;color:var(--muted);font-size:14px;font-weight:500;margin-top:6px}
+.back:hover{color:var(--text)}
+
+.intro{text-align:center;padding:18px 0 30px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:rgba(7,10,24,.5);border-radius:999px;padding:7px 15px;font-size:13px;color:var(--muted);margin-bottom:18px}
+.pill .s{width:7px;height:7px;border-radius:50%;background:var(--core);box-shadow:0 0 9px var(--core)}
+.intro h1{font-size:clamp(30px,6vw,46px);font-weight:800;margin-bottom:14px}
+.grad{background:linear-gradient(120deg,var(--blue) 10%,var(--violet) 50%,var(--core) 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.intro p{color:var(--muted);font-size:17px;max-width:500px;margin:0 auto}
+
+.formcard{background:rgba(9,13,28,.78);border:1px solid var(--border);border-radius:22px;padding:30px;backdrop-filter:blur(14px);margin-bottom:26px}
+.field{margin-bottom:18px}
+label.lab{display:block;font-size:14px;font-weight:600;color:var(--text);margin-bottom:7px;font-family:'Bricolage Grotesque'}
+label.lab .opt{color:var(--dim);font-weight:500;font-size:12.5px}
+.inp,textarea,select{width:100%;background:rgba(3,4,12,.5);border:1px solid var(--border);border-radius:11px;padding:13px 15px;color:var(--text);font-size:15px;font-family:'Inter';transition:border-color .2s,box-shadow .2s}
+.inp:focus,textarea:focus,select:focus{outline:0;border-color:var(--violet);box-shadow:0 0 0 3px rgba(155,107,255,.18)}
+.inp::placeholder,textarea::placeholder{color:var(--dim)}
+textarea{resize:vertical;min-height:84px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%239aa6c8' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.row2{grid-template-columns:1fr}}
+
+.toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.toggle input{position:absolute;opacity:0;pointer-events:none}
+.toggle label{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:1px solid var(--border);border-radius:12px;background:rgba(3,4,12,.4);font-weight:600;font-size:14.5px;cursor:pointer;transition:border-color .2s,background .2s,transform .2s var(--e)}
+.toggle label:hover{transform:translateY(-1px)}
+.toggle input:checked+label{border-color:var(--violet);background:linear-gradient(120deg,rgba(77,124,255,.16),rgba(155,107,255,.16));box-shadow:0 0 0 2px rgba(155,107,255,.25)}
+
+.reveal-url{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s var(--e),opacity .35s var(--e),margin .35s var(--e)}
+.reveal-url.show{max-height:140px;opacity:1;margin-top:18px}
+
+.filebox{border:1.5px dashed var(--border);border-radius:13px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;display:block}
+.filebox:hover{border-color:var(--violet);background:rgba(155,107,255,.05)}
+.filebox .fi{width:34px;height:34px;color:var(--core);margin:0 auto 8px;display:block;stroke:currentColor;fill:none;stroke-width:1.6}
+.filebox b{display:block;font-size:14.5px;color:var(--text);font-family:'Bricolage Grotesque'}
+.filebox span{font-size:12.5px;color:var(--dim)}
+.filebox input{display:none}
+#fileNames{font-size:13px;color:var(--core);margin-top:9px;font-weight:600}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:16px;border-radius:13px;font-weight:700;font-size:16px;font-family:'Bricolage Grotesque';cursor:pointer;border:0;background:linear-gradient(120deg,var(--core),#ff9d4d);color:#1a1206;box-shadow:0 10px 30px rgba(255,215,107,.4);transition:transform .3s var(--e),box-shadow .3s var(--e)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 16px 44px rgba(255,215,107,.55)}
+.btn:active{transform:translateY(0) scale(.99)}
+.fineprint{text-align:center;font-size:12.5px;color:var(--dim);margin-top:14px}
+
+.alt{text-align:center;color:var(--muted);font-size:15px;margin-bottom:40px}
+.alt a{color:var(--core);font-weight:700}
+
+.success{display:none;text-align:center;background:rgba(9,13,28,.78);border:1px solid rgba(35,213,171,.4);border-radius:22px;padding:46px 30px;backdrop-filter:blur(14px)}
+.success.show{display:block}
+.success .ok{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#23d5ab,#4d7cff);display:grid;place-items:center;margin:0 auto 20px;box-shadow:0 0 36px rgba(35,213,171,.45)}
+.success .ok svg{width:32px;height:32px;stroke:#03040c;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.success h2{font-size:30px;margin-bottom:12px}
+.success p{color:var(--muted);font-size:16px;max-width:420px;margin:0 auto 24px}
+
+.bloom{position:fixed;left:0;top:0;width:280px;height:280px;margin:-140px 0 0 -140px;border-radius:50%;pointer-events:none;z-index:60;mix-blend-mode:screen;opacity:0;will-change:transform,opacity;background:radial-gradient(circle,var(--bloom-c,#9b6bff),transparent 66%)}
+.bloom.go{animation:bb .6s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes bb{0%{opacity:0;transform:scale(.4)}16%{opacity:.8}100%{opacity:0;transform:scale(1.7)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="/nova.html"><span class="mark">N</span> Supernova</a>
+    <a class="back" href="/nova.html">← Back to site</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <span class="pill"><span class="s"></span> 100% free · no commitment</span>
+    <h1>Get a <span class="grad">free preview</span> of your new website.</h1>
+    <p>Tell us about your business and we'll build you a real preview — live in 48 hours. If you love it, we make it yours. If not, no worries.</p>
+  </div>
+
+  <!-- SETUP: form posts to FormSubmit.co (free, no signup). First submission sends an
+       activation email to correiadossantoswilliam44@gmail.com — click the link once to turn it on.
+       Photos are emailed as attachments (keep total under ~25MB). -->
+  <form id="leadForm" class="formcard" action="https://formsubmit.co/correiadossantoswilliam44@gmail.com" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="_subject" value="🚀 New free preview request"/>
+    <input type="hidden" name="_template" value="table"/>
+    <input type="hidden" name="_captcha" value="false"/>
+    <input type="hidden" name="_next" value="https://correiadossantoswilliam44-hub.github.io/get-started.html?sent=1"/>
+    <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off"/>
+
+    <div class="field">
+      <label class="lab">Do you already have a website?</label>
+      <div class="toggle">
+        <input type="radio" id="hwNo" name="Has a website" value="No, build me one" checked/>
+        <label for="hwNo">No — build me one</label>
+        <input type="radio" id="hwYes" name="Has a website" value="Yes, rebuild it"/>
+        <label for="hwYes">Yes — make it better</label>
+      </div>
+      <div class="reveal-url" id="urlReveal">
+        <label class="lab">Your current website link <span class="opt">— we'll rebuild it sharper</span></label>
+        <input class="inp" type="url" name="Current website" placeholder="https://yoursite.com"/>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="lab">Business name</label>
+        <input class="inp" type="text" name="Business name" placeholder="e.g. Apex Plumbing" required/>
+      </div>
+      <div class="field">
+        <label class="lab">Location</label>
+        <input class="inp" type="text" name="Location" placeholder="City, State" required/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lab">What do you do?</label>
+      <select class="inp" name="Trade / Service" required>
+        <option value="" disabled selected>Choose your trade…</option>
+        <option>Plumbing</option><option>Roofing</option><option>HVAC</option>
+        <option>Electrical</option><option>Masonry &amp; Concrete</option><option>Landscaping</option>
+        <option>Remodeling</option><option>Barber / Salon</option><option>Home Services</option><option>Other</option>
+      </select>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="lab">Phone</label>
+        <input class="inp" type="tel" name="Phone" placeholder="(555) 123-4567" required/>
+      </div>
+      <div class="field">
+        <label class="lab">Email</label>
+        <input class="inp" type="email" name="email" placeholder="you@business.com" required/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lab">Photos of your work or products <span class="opt">— optional, but they make your preview shine</span></label>
+      <label class="filebox">
+        <svg class="fi" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg>
+        <b>Tap to add photos</b>
+        <span>Job shots, products, your team, your logo (JPG/PNG)</span>
+        <input type="file" name="Photos" accept="image/*" multiple/>
+      </label>
+      <div id="fileNames"></div>
+    </div>
+
+    <div class="field">
+      <label class="lab">Anything else? <span class="opt">— optional</span></label>
+      <textarea name="Anything else" placeholder="Colors you like, what you want it to do, a competitor's site you admire…"></textarea>
+    </div>
+
+    <button class="btn" type="submit">Get My Free Preview →</button>
+    <div class="fineprint">We'll text or email your preview within 48 hours. No spam, no commitment.</div>
+  </form>
+
+  <div class="success" id="successCard">
+    <div class="ok"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></div>
+    <h2>You're in. 🚀</h2>
+    <p>We got your details. Your free website preview will land in your inbox or texts within 48 hours. Keep an eye out!</p>
+    <a class="btn" style="max-width:320px;margin:0 auto" href="https://calendly.com/correiadossantoswilliam44/30min" target="_blank" rel="noopener">Or book a quick call now</a>
+  </div>
+
+  <p class="alt" id="altCall">Prefer to just talk it through? <a href="https://calendly.com/correiadossantoswilliam44/30min" target="_blank" rel="noopener">Book a free 15-min call →</a></p>
+</main>
+
+<script>
+// Reveal the website-link field when "Yes — make it better" is chosen
+const yes=document.getElementById('hwYes'), no=document.getElementById('hwNo'), reveal=document.getElementById('urlReveal');
+function sync(){ reveal.classList.toggle('show', yes.checked); }
+yes.addEventListener('change',sync); no.addEventListener('change',sync); sync();
+
+// Show selected photo names
+const fileInput=document.querySelector('input[type=file]'), names=document.getElementById('fileNames');
+fileInput.addEventListener('change',()=>{
+  const f=[...fileInput.files].map(x=>x.name);
+  names.textContent = f.length ? '✓ '+f.length+' photo'+(f.length>1?'s':'')+' added' : '';
+});
+
+// Success state after FormSubmit redirect (?sent=1)
+if(new URLSearchParams(location.search).get('sent')==='1'){
+  document.getElementById('leadForm').style.display='none';
+  document.getElementById('altCall').style.display='none';
+  document.querySelector('.intro p').textContent='Thanks for reaching out — here’s what happens next.';
+  document.getElementById('successCard').classList.add('show');
+  history.replaceState(null,'',location.pathname);
+}
+
+// DMT bloom on tap/click (matches main site), reduced-motion safe
+(function(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const hues=['#9b6bff','#4d7cff','#ffd76b','#23d5ab','#ff6bd6']; let n=0,last=0;
+  addEventListener('pointerdown',function(e){
+    const t=performance.now(); if(t-last<90)return; last=t;
+    const b=document.createElement('div'); b.className='bloom';
+    const g=e.target&&e.target.closest&&e.target.closest('.btn');
+    b.style.setProperty('--bloom-c',g?'#ffd76b':hues[n++%hues.length]);
+    b.style.left=e.clientX+'px'; b.style.top=e.clientY+'px';
+    document.body.appendChild(b);
+    requestAnimationFrame(()=>b.classList.add('go'));
+    b.addEventListener('animationend',()=>b.remove());
+    setTimeout(()=>b.remove(),900);
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

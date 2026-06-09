@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Your AI Receptionist · Live Demo</title>
+<style>
+:root{
+  --bg:#0a0f1e;--card:#141d36;--card2:#1a2444;--border:rgba(255,255,255,.08);
+  --text:#eef3ff;--muted:#93a1c4;--brand:#5b8cff;--brand2:#7c5cff;--green:#23d5ab;--gold:#f7c948;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:40px}
+.hero{text-align:center;padding:40px 20px 28px;background:radial-gradient(600px 300px at 50% 0%,rgba(124,92,255,.25),transparent 70%)}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:999px;border:1px solid rgba(35,213,171,.3);background:rgba(35,213,171,.08);color:var(--green);font-size:12px;font-weight:600;margin-bottom:18px}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(35,213,171,.2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.hero h1 span{background:linear-gradient(120deg,var(--brand),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);font-size:15px;max-width:420px;margin:0 auto}
+.biz-name{color:var(--gold);font-weight:700}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:24px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center}
+.stat .num{font-size:26px;font-weight:800;letter-spacing:-.03em}
+.stat .num.green{color:var(--green)}.stat .num.gold{color:var(--gold)}.stat .num.brand{color:var(--brand)}
+.stat .lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+.section-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin:24px 0 12px}
+.call{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.call-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;flex-shrink:0;font-size:18px}
+.call-body{flex:1;min-width:0}
+.call-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.call-name{font-weight:700;font-size:15px}
+.call-time{font-size:11px;color:var(--muted);white-space:nowrap}
+.call-need{font-size:13px;color:var(--muted);margin:3px 0 8px}
+.call-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px}
+.tag.booked{background:rgba(35,213,171,.15);color:var(--green)}
+.tag.value{background:rgba(247,201,72,.12);color:var(--gold)}
+.tag.saved{background:rgba(91,140,255,.12);color:var(--brand)}
+.cta{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(91,140,255,.3);border-radius:16px;padding:24px;text-align:center;margin-top:28px}
+.cta h3{font-size:18px;margin-bottom:8px}
+.cta p{color:var(--muted);font-size:14px;margin-bottom:16px}
+.cta .price{font-size:32px;font-weight:800;color:var(--green);margin:8px 0}
+.cta .price small{font-size:14px;color:var(--muted);font-weight:500}
+.btn{display:inline-block;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;padding:13px 28px;border-radius:10px;font-weight:600;text-decoration:none;font-size:15px}
+.demo-note{text-align:center;color:var(--muted);font-size:12px;margin-top:20px;opacity:.7}
+.editable{border-bottom:1px dashed rgba(247,201,72,.4)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge"><span class="dot"></span> AI Receptionist, Active</div>
+  <h1>Every call, <span>answered.</span></h1>
+  <p>This is what <span class="biz-name" id="bizName">your business</span> would see, every customer your AI receptionist caught while you were busy.</p>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="num green" id="statCaptured">14</div><div class="lbl">Calls caught</div></div>
+    <div class="stat"><div class="num brand" id="statBooked">9</div><div class="lbl">Want to book</div></div>
+    <div class="stat"><div class="num gold" id="statSaved">$3,150</div><div class="lbl">Revenue saved</div></div>
+  </div>
+
+  <div class="section-title">Recent captured calls</div>
+  <div id="callsList"></div>
+
+  <div class="cta">
+    <h3>This could be your shop.</h3>
+    <p>Stop losing customers to a busy phone. Set up in 48 hours.</p>
+    <div class="price">$199<small>/mo</small></div>
+    <a class="btn" href="#" id="ctaBtn">Get my AI receptionist →</a>
+  </div>
+
+  <div class="demo-note">Demo with sample data. Real numbers shown once live.</div>
+</div>
+
+<script>
+// Sample captured calls, this is the visual you show owners on your phone
+const sampleCalls = [
+  { name: 'Mike R.', need: 'Car won\'t start, needs a tow + diagnostic today', time: '2:14 PM', booked: true, value: 350 },
+  { name: 'Sarah T.', need: 'Wants an oil change appointment this week', time: '1:47 PM', booked: true, value: 80 },
+  { name: 'James P.', need: 'Brake noise, asking if you can look at it tomorrow', time: '12:33 PM', booked: true, value: 400 },
+  { name: 'Linda M.', need: 'Asked about state inspection pricing & hours', time: '11:20 AM', booked: false, value: 120 },
+  { name: 'Carlos D.', need: 'Check engine light, wants to come in', time: '10:05 AM', booked: true, value: 250 },
+  { name: 'Amanda K.', need: 'Fleet maintenance quote for 3 vans', time: '9:41 AM', booked: true, value: 900 },
+];
+
+function render() {
+  const params = new URLSearchParams(location.search);
+  const biz = params.get('biz');
+  if (biz) {
+    document.getElementById('bizName').textContent = biz;
+    document.title = `${biz} · AI Receptionist Demo`;
+  }
+
+  const list = document.getElementById('callsList');
+  list.innerHTML = sampleCalls.map(c => `
+    <div class="call">
+      <div class="call-icon">📞</div>
+      <div class="call-body">
+        <div class="call-top">
+          <div class="call-name">${c.name}</div>
+          <div class="call-time">${c.time}</div>
+        </div>
+        <div class="call-need">${c.need}</div>
+        <div class="call-tags">
+          ${c.booked ? '<span class="tag booked">✓ Wants to book</span>' : '<span class="tag saved">Question answered</span>'}
+          <span class="tag value">~$${c.value} job</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Recalc stats from sample
+  const captured = sampleCalls.length;
+  const booked = sampleCalls.filter(c => c.booked).length;
+  const saved = sampleCalls.reduce((s, c) => s + c.value, 0);
+  document.getElementById('statCaptured').textContent = captured;
+  document.getElementById('statBooked').textContent = booked;
+  document.getElementById('statSaved').textContent = '$' + saved.toLocaleString();
+}
+render();
+</script>
+</body>
+</html>

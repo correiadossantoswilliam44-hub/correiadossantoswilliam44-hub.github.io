@@ -213,6 +213,26 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 .stagger>*{opacity:0;transform:translateY(22px);filter:blur(6px)}
 .stagger.in>*{opacity:1;transform:none;filter:blur(0);transition:opacity .6s var(--e-out),transform .6s var(--e-out),filter .6s var(--e-out);transition-delay:calc(var(--i,0) * 70ms)}
 
+/* DMT bloom — soft glow materializes behind each section heading as it scrolls in */
+.sec-head{position:relative;z-index:0}
+.sec-head::before{content:"";position:absolute;left:50%;top:34%;width:min(540px,92%);aspect-ratio:1/1;transform:translate(-50%,-50%) scale(.55);border-radius:50%;background:radial-gradient(circle,rgba(155,107,255,.20),rgba(77,124,255,.12) 42%,transparent 70%);opacity:0;z-index:-1;pointer-events:none;transition:opacity 1.1s var(--e-out),transform 1.3s var(--e-out)}
+.sec-head.in::before{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+/* DMT bloom — colored burst on tap/click (spawned via JS); transform+opacity only */
+.bloom{position:fixed;left:0;top:0;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;pointer-events:none;z-index:60;mix-blend-mode:screen;opacity:0;will-change:transform,opacity;background:radial-gradient(circle,var(--bloom-c,#9b6bff) 0%,transparent 66%)}
+.bloom.go{animation:bloomburst .62s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes bloomburst{0%{opacity:0;transform:scale(.4)}16%{opacity:.8}100%{opacity:0;transform:scale(1.7)}}
+
+/* Mobile performance — backdrop-blur and reveal-blur are the jank sources; drop them on small screens */
+@media(max-width:760px){
+  header,.pill,.card,.trade,.price-card,.testi,.demo-card,.phase-node,.work-card{backdrop-filter:none}
+  .card,.testi,.demo-card{background:rgba(12,17,38,.94)}
+  .price-card{background:rgba(9,13,28,.92)}
+  .trade{background:rgba(13,18,40,.9)}
+  .phase-node{background:rgba(13,18,48,.95)}
+  .reveal,.reveal.in,.stagger>*,.stagger.in>*{filter:none}
+}
+
 @media(max-width:860px){.grid,.price-wrap{grid-template-columns:1fr}.trades-grid{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.nav-toggle{display:block}}
 @media(max-width:600px){
   section{padding:64px 0}
@@ -555,7 +575,7 @@ try {
   const canvas = document.getElementById('nova-fx');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, alpha:false, powerPreference:'high-performance' });
   renderer.setClearColor(0x000000, 1);              // black -> transparent under CSS screen blend
-  const DPR = innerWidth < 700 ? 0.75 : 1.0;        // lighter on phones for smooth performance
+  const DPR = innerWidth < 700 ? 0.6 : 1.0;         // lighter on phones for smooth performance
   renderer.setPixelRatio(DPR);
   renderer.setSize(innerWidth, innerHeight);
 
@@ -640,6 +660,28 @@ try {
   requestAnimationFrame(loop);
   document.addEventListener('visibilitychange', ()=>{ running=!document.hidden; if(running && !reduced) requestAnimationFrame(loop); });
 } catch(err){ console.warn('Nova GPU overlay unavailable:', err); }
+</script>
+
+<!-- DMT bloom: colored glow burst on tap/click — transient, GPU-cheap (transform+opacity), reduced-motion safe -->
+<script>
+(function(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const hues=['#9b6bff','#4d7cff','#ffd76b','#23d5ab','#ff6bd6'];
+  let n=0,last=0;
+  addEventListener('pointerdown',function(e){
+    const now=performance.now();
+    if(now-last<90) return; last=now;            // throttle so a scroll-gesture start doesn't stack blooms
+    const b=document.createElement('div');
+    b.className='bloom';
+    const glow=e.target&&e.target.closest&&e.target.closest('.btn-glow,.btn-primary');
+    b.style.setProperty('--bloom-c', glow ? '#ffd76b' : hues[n++%hues.length]);
+    b.style.left=e.clientX+'px'; b.style.top=e.clientY+'px';
+    document.body.appendChild(b);
+    requestAnimationFrame(function(){ b.classList.add('go'); });
+    b.addEventListener('animationend',function(){ b.remove(); });
+    setTimeout(function(){ b.remove(); },900);   // safety cleanup
+  },{passive:true});
+})();
 </script>
 </body>
 </html>

@@ -67,12 +67,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .reveal-url{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s var(--e),opacity .35s var(--e),margin .35s var(--e)}
 .reveal-url.show{max-height:140px;opacity:1;margin-top:18px}
 
-.filebox{border:1.5px dashed var(--border);border-radius:13px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;display:block}
+.filebox{border:1.5px dashed var(--border);border-radius:13px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;display:block;position:relative}
 .filebox:hover{border-color:var(--violet);background:rgba(155,107,255,.05)}
 .filebox .fi{width:34px;height:34px;color:var(--core);margin:0 auto 8px;display:block;stroke:currentColor;fill:none;stroke-width:1.6}
 .filebox b{display:block;font-size:14.5px;color:var(--text);font-family:'Bricolage Grotesque'}
 .filebox span{font-size:12.5px;color:var(--dim)}
-.filebox input{display:none}
+.filebox input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 #fileNames{font-size:13px;color:var(--core);margin-top:9px;font-weight:600}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:16px;border-radius:13px;font-weight:700;font-size:16px;font-family:'Bricolage Grotesque';cursor:pointer;border:0;background:linear-gradient(120deg,var(--core),#ff9d4d);color:#1a1206;box-shadow:0 10px 30px rgba(255,215,107,.4);transition:transform .3s var(--e),box-shadow .3s var(--e)}
@@ -176,7 +176,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <label class="filebox">
         <svg class="fi" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg>
         <b>Tap to add photos</b>
-        <span>Job shots, products, your team, your logo (JPG/PNG)</span>
+        <span>Take a photo or pick from your camera roll — job shots, products, your logo</span>
         <input type="file" name="Photos" accept="image/*" multiple/>
       </label>
       <div id="fileNames"></div>

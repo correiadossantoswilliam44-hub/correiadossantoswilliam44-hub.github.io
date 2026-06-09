@@ -536,17 +536,36 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 </footer>
 
 <script>
-document.getElementById('yr').textContent = new Date().getFullYear();
-const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){
-  e.target.classList.add('in');
-  if(e.target.classList.contains('stagger')){[...e.target.children].forEach((c,i)=>c.style.setProperty('--i',i));}
-  io.unobserve(e.target);
-}})},{threshold:.14});
-document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
-document.querySelector('.nav-toggle').addEventListener('click',()=>{
-  const l=document.querySelector('.nav-links');const open=l.style.display==='flex';
-  Object.assign(l.style,{display:open?'none':'flex',position:'absolute',top:'72px',left:'0',right:'0',flexDirection:'column',background:'var(--deep)',padding:'20px',borderBottom:'1px solid var(--border)',gap:'18px'});
-});
+(function(){
+  var yr=document.getElementById('yr'); if(yr) yr.textContent=new Date().getFullYear();
+
+  // Scroll-reveal: rAF-throttled, works reliably on mobile (no IntersectionObserver quirks),
+  // reveals as elements enter view, and removes its own listeners once everything is shown.
+  var items=[].slice.call(document.querySelectorAll('.reveal,.stagger'));
+  function show(el){
+    if(el.classList.contains('stagger')){ for(var i=0;i<el.children.length;i++) el.children[i].style.setProperty('--i',i); }
+    el.classList.add('in');
+  }
+  function check(){
+    var h=innerHeight||document.documentElement.clientHeight;
+    for(var i=items.length-1;i>=0;i--){
+      if(items[i].getBoundingClientRect().top < h*0.92){ show(items[i]); items.splice(i,1); }
+    }
+    if(!items.length){ removeEventListener('scroll',onScroll); removeEventListener('resize',onScroll); }
+  }
+  var ticking=false;
+  function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(function(){ ticking=false; check(); }); } }
+  addEventListener('scroll',onScroll,{passive:true});
+  addEventListener('resize',onScroll,{passive:true});
+  check();                                   // reveal anything already on-screen right away
+  addEventListener('load',function(){ setTimeout(check,80); });   // safety pass once layout settles
+
+  var tgl=document.querySelector('.nav-toggle');
+  if(tgl) tgl.addEventListener('click',function(){
+    var l=document.querySelector('.nav-links'); var open=l.style.display==='flex';
+    Object.assign(l.style,{display:open?'none':'flex',position:'absolute',top:'72px',left:'0',right:'0',flexDirection:'column',background:'var(--deep)',padding:'20px',borderBottom:'1px solid var(--border)',gap:'18px'});
+  });
+})();
 </script>
 
 <!-- Ambient looping video background (smooth, no scroll coupling) -->

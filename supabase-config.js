@@ -13,8 +13,8 @@
  * the admin dashboard shows a friendly "not set up yet" notice.
  */
 window.NOVA_SUPABASE = {
-  url:     'https://YOUR-PROJECT-REF.supabase.co',
-  anonKey: 'YOUR-PUBLIC-ANON-KEY'
+  url:     'https://kgvgorpundpdqauokfnx.supabase.co',
+  anonKey: 'sb_publishable_KwzH-u1BCCo9zxpRO7YDuA_66WNHcbN'
 };
 
 // True once real values are in place (used to switch features on automatically).

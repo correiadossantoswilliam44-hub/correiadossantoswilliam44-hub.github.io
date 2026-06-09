@@ -271,7 +271,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 </head>
 <body>
 <div class="spacebg"></div>
-<video id="bgvid" src="nova-bg.mp4" poster="nova-bg-poster.jpg" autoplay loop muted playsinline preload="auto"></video>
+<video id="bgvid" poster="nova-bg-poster.jpg" loop muted playsinline preload="none"></video>
 <canvas id="nova-fx" aria-hidden="true"></canvas>
 <div class="scrim"></div>
 
@@ -573,16 +573,23 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 <!-- Ambient looping video background (smooth, no scroll coupling) -->
 <script>
 (function(){
-  const v = document.getElementById('bgvid');
+  var v = document.getElementById('bgvid');
   if(!v) return;
   v.muted = true; v.defaultMuted = true; v.playsInline = true;
-  if(matchMedia('(prefers-reduced-motion:reduce)').matches){
-    v.removeAttribute('autoplay'); v.removeAttribute('loop'); v.pause();
-    return;
-  }
-  const go = ()=>{ const p = v.play(); if(p && p.catch) p.catch(()=>{}); };
-  go();
+  var c = navigator.connection || {};
+  // Skip the 2.3MB video on phones/tablets, data-saver, and slow connections — the poster
+  // image + CSS gradient carry the cosmic look, so mobile/cellular loads stay fast & smooth.
+  var skip = matchMedia('(prefers-reduced-motion:reduce)').matches
+    || matchMedia('(pointer:coarse)').matches
+    || c.saveData
+    || /^(slow-2g|2g|3g)$/.test(c.effectiveType||'')
+    || (typeof c.downlink === 'number' && c.downlink > 0 && c.downlink < 1.6);
+  if(skip) return;                                  // poster stays as the static background
+  v.preload = 'auto';
+  v.src = 'nova-bg.mp4';
+  var go = function(){ var p = v.play(); if(p && p.catch) p.catch(function(){}); };
   v.addEventListener('canplay', go, {once:true});
+  v.load(); go();
 })();
 </script>
 

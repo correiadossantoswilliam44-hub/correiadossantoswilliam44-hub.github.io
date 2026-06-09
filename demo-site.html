@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Demo Site — Supernova</title>
+<meta name="description" content="A live sample website Supernova builds for local trade businesses — fast, modern, and ready to capture every lead. Get yours live in 48 hours."/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" type="image/svg+xml" href="/logo.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --acc:#0d6efd;--acc2:#2b8bff;--ink:#10182b;--body:#475069;--line:#e7ebf3;
+  --bg:#ffffff;--soft:#f5f7fc;--radius:16px;--maxw:1140px;
+  --e:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--body);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Plus Jakarta Sans','Inter',sans-serif;color:var(--ink);line-height:1.12;letter-spacing:-.02em}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:12px;font-weight:700;font-size:15px;font-family:'Plus Jakarta Sans';cursor:pointer;border:0;transition:transform .25s var(--e),box-shadow .25s var(--e),background .2s}
+.btn-acc{background:linear-gradient(120deg,var(--acc),var(--acc2));color:#fff;box-shadow:0 10px 24px -8px var(--acc)}
+.btn-acc:hover{transform:translateY(-2px);box-shadow:0 16px 34px -8px var(--acc)}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{transform:translateY(-2px);border-color:var(--acc)}
+.btn-white{background:#fff;color:var(--ink)}.btn-white:hover{transform:translateY(-2px)}
+.svgi{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle}
+
+/* Supernova ribbon */
+.ribbon{background:linear-gradient(120deg,#070a18,#1a1340);color:#eef2ff;font-size:13px;font-weight:500}
+.ribbon .wrap{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:46px;flex-wrap:wrap;padding-top:7px;padding-bottom:7px}
+.ribbon a.rib-cta{color:#ffd76b;font-weight:700;white-space:nowrap}
+.ribbon .rib-left{display:flex;align-items:center;gap:9px}
+.spark{width:7px;height:7px;border-radius:50%;background:#ffd76b;box-shadow:0 0 9px #ffd76b;flex-shrink:0}
+.switch{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#9aa6c8}
+.switch select{font-family:inherit;font-size:12.5px;font-weight:600;color:#eef2ff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 9px;cursor:pointer}
+
+/* header */
+header{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;justify-content:space-between;height:70px}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Plus Jakarta Sans';font-weight:800;font-size:20px;color:var(--ink)}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:14.5px;font-weight:600;color:var(--body)}
+.nav-links a:hover{color:var(--acc)}
+@media(max-width:780px){.nav-links{display:none}}
+
+/* hero */
+.hero{position:relative;overflow:hidden;background:var(--soft)}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 82% 12%,color-mix(in srgb,var(--acc) 18%,transparent),transparent 60%),radial-gradient(50% 60% at 10% 90%,color-mix(in srgb,var(--acc2) 14%,transparent),transparent 60%);pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:74px 24px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:20px}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--acc)}
+.hero h1{font-size:clamp(33px,4.6vw,52px);font-weight:800;margin-bottom:16px}
+.hero p.sub{font-size:clamp(16px,1.7vw,19px);max-width:520px;margin-bottom:28px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero-rating{display:flex;align-items:center;gap:10px;margin-top:24px;font-size:14px;color:var(--body)}
+.stars{color:#f5a623;letter-spacing:1px}
+.hero-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 60px -30px rgba(16,24,43,.35);overflow:hidden}
+.hero-card .hc-top{height:150px;background:linear-gradient(135deg,var(--acc),var(--acc2));position:relative;display:grid;place-items:center}
+.hero-card .hc-ico{width:64px;height:64px;color:#fff;opacity:.95}
+.hero-card .hc-ico svg{width:64px;height:64px;stroke-width:1.5}
+.hc-body{padding:20px 22px}
+.hc-body h3{font-size:18px;margin-bottom:4px}
+.hc-body .hc-sub{font-size:13.5px;color:var(--body);margin-bottom:16px}
+.hc-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-size:14px;font-weight:600;color:var(--ink)}
+.hc-row .svgi{color:var(--acc)}
+.hc-book{margin-top:16px}
+.hc-book .btn{width:100%;justify-content:center}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr;gap:30px;padding:54px 24px}.hero-card{max-width:440px}}
+
+/* trust strip */
+.trust{border-bottom:1px solid var(--line)}
+.trust .wrap{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;padding:20px 24px}
+.trust .t{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:var(--ink)}
+.trust .t .svgi{color:var(--acc)}
+
+section{padding:78px 0}
+.head{text-align:center;max-width:640px;margin:0 auto 46px}
+.ey{color:var(--acc);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:10px;font-family:'Plus Jakarta Sans'}
+.head h2{font-size:clamp(27px,3.6vw,38px);font-weight:800;margin-bottom:12px}
+.head p{font-size:17px}
+
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.svc{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px;transition:transform .3s var(--e),box-shadow .3s var(--e),border-color .3s}
+.svc:hover{transform:translateY(-5px);box-shadow:0 22px 44px -26px rgba(16,24,43,.4);border-color:color-mix(in srgb,var(--acc) 40%,var(--line))}
+.svc .si{width:46px;height:46px;border-radius:11px;background:color-mix(in srgb,var(--acc) 12%,#fff);display:grid;place-items:center;margin-bottom:15px;color:var(--acc)}
+.svc .si svg{width:24px;height:24px}
+.svc h4{font-size:17px;margin-bottom:7px}
+.svc p{font-size:14px}
+@media(max-width:900px){.svc-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.svc-grid{grid-template-columns:1fr}}
+
+.why{background:var(--soft)}
+.why .wrap{display:grid;grid-template-columns:1fr 1fr;gap:46px;align-items:center}
+.why-visual{border-radius:20px;min-height:340px;background:linear-gradient(135deg,var(--acc),var(--acc2));position:relative;overflow:hidden;display:grid;place-items:center;box-shadow:0 30px 60px -30px var(--acc)}
+.why-visual .bigico{width:120px;height:120px;color:#fff;opacity:.9}
+.why-visual .bigico svg{width:120px;height:120px;stroke-width:1.2}
+.why-list{list-style:none;display:grid;gap:18px;margin-top:8px}
+.why-list li{display:flex;gap:13px;align-items:flex-start}
+.why-list .ck{width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;flex-shrink:0;margin-top:2px}
+.why-list .ck svg{width:15px;height:15px}
+.why-list b{color:var(--ink);font-family:'Plus Jakarta Sans';font-size:16px;display:block;margin-bottom:2px}
+.why-list span{font-size:14.5px}
+@media(max-width:860px){.why .wrap{grid-template-columns:1fr;gap:30px}.why-visual{min-height:220px;order:-1}}
+
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.rev{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.rev .stars{font-size:15px;margin-bottom:12px;display:block}
+.rev p{font-size:15px;color:var(--ink);margin-bottom:16px}
+.rev .who{display:flex;align-items:center;gap:11px}
+.rev .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;display:grid;place-items:center;font-weight:700;font-family:'Plus Jakarta Sans'}
+.rev .nm{font-weight:700;color:var(--ink);font-size:14.5px;font-family:'Plus Jakarta Sans'}
+.rev .lc{font-size:12.5px;color:var(--body)}
+@media(max-width:900px){.rev-grid{grid-template-columns:1fr}}
+
+.cta-band{background:linear-gradient(120deg,var(--acc),var(--acc2));color:#fff;text-align:center;border-radius:24px;padding:54px 30px;margin:0 24px}
+.cta-band h2{color:#fff;font-size:clamp(26px,3.6vw,40px);margin-bottom:12px}
+.cta-band p{color:rgba(255,255,255,.9);font-size:18px;max-width:520px;margin:0 auto 26px}
+.cta-band .btn{font-size:16px;padding:15px 28px}
+
+footer{padding:40px 0;border-top:1px solid var(--line);color:var(--body);font-size:14px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.foot .by{font-size:13px}.foot .by a{color:var(--acc);font-weight:700}
+
+.callfab{position:fixed;right:18px;bottom:18px;z-index:50;display:none;align-items:center;gap:8px;background:linear-gradient(120deg,var(--acc),var(--acc2));color:#fff;padding:13px 18px;border-radius:999px;font-weight:700;font-family:'Plus Jakarta Sans';box-shadow:0 12px 30px -8px var(--acc)}
+@media(max-width:780px){.callfab{display:inline-flex}}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="d-plumb" viewBox="0 0 24 24"><path d="M15.5 8.5a4 4 0 1 0-5.6 5.6l-5 5a2.1 2.1 0 0 0 3 3l5-5a4 4 0 0 0 5.6-5.6l-2.3 2.3-2.8-2.8z"/></symbol>
+  <symbol id="d-roof" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5V14h4v5.5"/></symbol>
+  <symbol id="d-hvac" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 12 6.5 6.5M12 12l5.5-5.5M12 12l-5.5 5.5M12 12l5.5 5.5"/><circle cx="12" cy="12" r="1.6"/></symbol>
+  <symbol id="d-elec" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></symbol>
+  <symbol id="d-mason" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18M8 7v5M16 7v5M5 12v5M12 12v5M19 12v5"/></symbol>
+  <symbol id="d-land" viewBox="0 0 24 24"><path d="M12 21v-7"/><path d="M12 14c-4 0-6-2.5-6-6 3 0 6 1 6 6Z"/><path d="M12 12c0-3 2-5 5-5 0 3-2 5-5 5Z"/></symbol>
+  <symbol id="d-remodel" viewBox="0 0 24 24"><path d="M14.5 6.5 18 3l3 3-3.5 3.5-2-2zM13 8l-9 9a2.1 2.1 0 0 0 3 3l9-9"/><path d="m12 9 3 3"/></symbol>
+  <symbol id="d-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><circle cx="12" cy="14.5" r="2"/></symbol>
+  <symbol id="d-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1A19.5 19.5 0 0 1 4.7 12 19.8 19.8 0 0 1 1.6 3.4 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L7.9 8.8a16 16 0 0 0 6 6l1-1a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
+  <symbol id="d-check" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></symbol>
+  <symbol id="d-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="d-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="d-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></symbol>
+</defs></svg>
+
+<div class="ribbon">
+  <div class="wrap">
+    <span class="rib-left"><span class="spark"></span> Sample demo built by Supernova — this is what your site could look like.</span>
+    <span class="switch">View trade:
+      <select id="tradeSwitch" aria-label="Switch trade demo"></select>
+    </span>
+    <a class="rib-cta" href="/nova.html#pricing">Get yours in 48 hrs →</a>
+  </div>
+</div>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="#top"><span class="mark" id="brandMark">A</span><span id="brandName">Apex Plumbing</span></a>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#why">Why Us</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#book">Contact</a>
+      </div>
+      <a class="btn btn-acc" id="navCall" href="tel:+18572287393"><svg class="svgi"><use href="#d-phone"/></svg> <span id="navPhone">(857) 228-7393</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="pill"><span class="dot"></span> <span id="heroTag">Licensed · Insured · Locally Owned</span></span>
+      <h1 id="heroH1">Fast, Reliable Plumbing — Done Right the First Time.</h1>
+      <p class="sub" id="heroSub">Serving your neighborhood with honest pricing and same-day service. Book online in under a minute.</p>
+      <div class="hero-cta">
+        <a class="btn btn-acc" id="heroCall" href="tel:+18572287393"><svg class="svgi"><use href="#d-phone"/></svg> Call Now</a>
+        <a class="btn btn-ghost" href="#book">Get a Free Quote</a>
+      </div>
+      <div class="hero-rating"><span class="stars">★★★★★</span> <span><b id="ratingNum" style="color:var(--ink)">4.9</b> from 200+ local reviews</span></div>
+    </div>
+    <div class="hero-card">
+      <div class="hc-top"><span class="hc-ico"><svg id="heroIco"><use href="#d-plumb"/></svg></span></div>
+      <div class="hc-body">
+        <h3>Book a Visit</h3>
+        <div class="hc-sub">Our AI receptionist answers 24/7 and books you instantly.</div>
+        <div class="hc-row"><svg class="svgi"><use href="#d-clock"/></svg> Same-day &amp; emergency service</div>
+        <div class="hc-row"><svg class="svgi"><use href="#d-shield"/></svg> Upfront, no-surprise pricing</div>
+        <div class="hc-row"><svg class="svgi"><use href="#d-cal"/></svg> Easy online scheduling</div>
+        <div class="hc-book"><a class="btn btn-acc" href="#book">Schedule Now</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="wrap">
+    <span class="t"><svg class="svgi"><use href="#d-shield"/></svg> Licensed &amp; Insured</span>
+    <span class="t"><svg class="svgi"><use href="#d-clock"/></svg> 24/7 Booking</span>
+    <span class="t"><svg class="svgi"><use href="#d-check"/></svg> 5-Star Rated</span>
+    <span class="t"><svg class="svgi"><use href="#d-phone"/></svg> Never Miss a Call</span>
+  </div>
+</div>
+
+<section id="services">
+  <div class="wrap">
+    <div class="head">
+      <span class="ey">What We Do</span>
+      <h2 id="svcH2">Plumbing Services You Can Count On</h2>
+      <p>Quality workmanship, fair prices, and a team that shows up on time.</p>
+    </div>
+    <div class="svc-grid" id="svcGrid"></div>
+  </div>
+</section>
+
+<section class="why" id="why">
+  <div class="wrap">
+    <div>
+      <span class="ey">Why Choose Us</span>
+      <h2 id="whyH2">Your trusted local pros.</h2>
+      <ul class="why-list">
+        <li><span class="ck"><svg><use href="#d-check"/></svg></span><div><b>Every call answered</b><span>Our AI receptionist captures every lead, 24/7 — you never lose a job to voicemail.</span></div></li>
+        <li><span class="ck"><svg><use href="#d-check"/></svg></span><div><b>Upfront pricing</b><span>Know the cost before we start. No hidden fees, no surprises.</span></div></li>
+        <li><span class="ck"><svg><use href="#d-check"/></svg></span><div><b>Fast response times</b><span>Same-day and emergency service available across the area.</span></div></li>
+        <li><span class="ck"><svg><use href="#d-check"/></svg></span><div><b>Satisfaction guaranteed</b><span>We stand behind our work with a workmanship guarantee.</span></div></li>
+      </ul>
+    </div>
+    <div class="why-visual"><span class="bigico"><svg id="whyIco"><use href="#d-plumb"/></svg></span></div>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="wrap">
+    <div class="head">
+      <span class="ey">Reviews</span>
+      <h2>What our customers say</h2>
+      <p>Real homeowners, real results. (Sample reviews shown in this demo.)</p>
+    </div>
+    <div class="rev-grid" id="revGrid"></div>
+  </div>
+</section>
+
+<section id="book" style="padding-bottom:90px">
+  <div class="wrap">
+    <div class="cta-band">
+      <h2 id="ctaH2">Need a pro today?</h2>
+      <p>Call now or book online — our team (and our AI receptionist) is standing by.</p>
+      <a class="btn btn-white" id="ctaCall" href="tel:+18572287393"><svg class="svgi"><use href="#d-phone"/></svg> <span id="ctaPhone">(857) 228-7393</span></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div><strong id="footName" style="color:var(--ink);font-family:'Plus Jakarta Sans'">Apex Plumbing</strong> · Licensed &amp; Insured</div>
+    <div class="by">⚡ Sample site by <a href="/nova.html">Supernova</a> — real sites live in 48 hours.</div>
+  </div>
+</footer>
+
+<a class="callfab" id="fabCall" href="tel:+18572287393"><svg class="svgi"><use href="#d-phone"/></svg> Call</a>
+
+<script>
+const TRADES = {
+  plumbing:{name:"Apex Plumbing",label:"Plumbing",acc:"#0d6efd",acc2:"#2b8bff",ico:"d-plumb",
+    tag:"Licensed · Insured · Locally Owned",
+    h1:"Fast, Reliable Plumbing — Done Right the First Time.",
+    sub:"Serving your neighborhood with honest pricing and same-day service. Book online in under a minute.",
+    svcH2:"Plumbing Services You Can Count On",whyH2:"Your trusted local plumbers.",ctaH2:"Got a leak? We're on the way.",
+    services:[["Emergency Repairs","Burst pipes, leaks, and clogs handled fast — 24/7."],["Drain Cleaning","Clear stubborn clogs and keep things flowing."],["Water Heaters","Repair or replace — tank and tankless installs."],["Repiping","Upgrade old pipes for better pressure and safety."]],
+    reviews:[["Showed up within the hour and fixed our burst pipe. Lifesavers.","Maria G.","Homeowner"],["Honest pricing and clean work. Booked it all online in a minute.","Dave R.","Property Manager"],["Best plumber we've used. The text reminders were a nice touch.","Sandra L.","Homeowner"]]},
+  roofing:{name:"Summit Roofing",label:"Roofing",acc:"#c2632a",acc2:"#e0843f",ico:"d-roof",
+    tag:"Free Inspections · Storm-Damage Experts",
+    h1:"Roofs Built to Last. Storms Handled Fast.",
+    sub:"From small repairs to full replacements — quality roofing backed by a workmanship guarantee.",
+    svcH2:"Roofing Services Done Right",whyH2:"Your trusted local roofers.",ctaH2:"Storm damage? Get a free inspection.",
+    services:[["Roof Replacement","Durable new roofs in the material you want."],["Storm Damage","Fast repairs and insurance-claim help."],["Roof Repairs","Leaks, missing shingles, and flashing fixed."],["Free Inspections","Know your roof's health, no cost, no pressure."]],
+    reviews:[["New roof in two days and it looks incredible. Highly recommend.","Tom B.","Homeowner"],["They handled the whole insurance claim for us after the storm.","Priya N.","Homeowner"],["Free inspection, honest assessment, fair price. No pushy sales.","Greg M.","Homeowner"]]},
+  hvac:{name:"Arctic Air HVAC",label:"HVAC",acc:"#0ca7b8",acc2:"#22c9d6",ico:"d-hvac",
+    tag:"Heating & Cooling · Same-Day Service",
+    h1:"Comfort in Every Season.",
+    sub:"Heating and cooling repairs, installs, and tune-ups — keeping your home comfortable year-round.",
+    svcH2:"Heating & Cooling Services",whyH2:"Your trusted comfort experts.",ctaH2:"No heat? No AC? We'll be right there.",
+    services:[["AC Repair","Fast cooling fixes when you need them most."],["Heating Service","Furnace and heat-pump repair & installs."],["New Installations","Energy-efficient systems sized for your home."],["Maintenance Plans","Seasonal tune-ups to prevent breakdowns."]],
+    reviews:[["AC died in a heat wave — fixed same day. Incredible service.","Karen W.","Homeowner"],["Installed a whole new system cleanly and on budget.","Luis A.","Homeowner"],["The maintenance plan has saved us from two breakdowns.","Beth C.","Homeowner"]]},
+  electrical:{name:"Bolt Electric",label:"Electrical",acc:"#e0930b",acc2:"#f5b528",ico:"d-elec",
+    tag:"Licensed Electricians · On Time, Every Time",
+    h1:"Licensed Electricians You Can Trust.",
+    sub:"Safe, code-compliant electrical work — from outlets to panel upgrades and EV chargers.",
+    svcH2:"Electrical Services Done Safely",whyH2:"Your trusted local electricians.",ctaH2:"Need an electrician? Call us today.",
+    services:[["Panel Upgrades","Modernize your electrical panel safely."],["Wiring & Rewiring","New circuits and whole-home rewiring."],["Lighting","Indoor, outdoor, and recessed lighting."],["EV Chargers","Home charger installation done right."]],
+    reviews:[["Upgraded our panel and explained everything clearly. Pros.","Nathan P.","Homeowner"],["Installed our EV charger same week we called. Spotless work.","Olivia D.","Homeowner"],["On time, fair price, and left the place clean.","Marcus T.","Homeowner"]]},
+  masonry:{name:"Cornerstone Masonry",label:"Masonry & Concrete",acc:"#8a6d5b",acc2:"#a98a76",ico:"d-mason",
+    tag:"Brick · Stone · Concrete Specialists",
+    h1:"Masonry That Stands the Test of Time.",
+    sub:"Beautiful, lasting stonework and concrete — patios, walls, walkways, and repairs.",
+    svcH2:"Masonry & Concrete Services",whyH2:"Your trusted masonry pros.",ctaH2:"Planning a project? Let's talk.",
+    services:[["Patios & Walkways","Custom pavers, brick, and natural stone."],["Retaining Walls","Functional walls that look great and last."],["Chimney Repair","Repointing, rebuilds, and waterproofing."],["Concrete Work","Driveways, slabs, steps, and foundations."]],
+    reviews:[["Our new stone patio is stunning. Craftsmanship is top-notch.","Helen R.","Homeowner"],["Rebuilt our chimney and matched the brick perfectly.","Frank O.","Homeowner"],["Retaining wall came out beautiful and solid. Great crew.","Dana V.","Homeowner"]]},
+  landscaping:{name:"Evergreen Landscaping",label:"Landscaping",acc:"#2f9e44",acc2:"#51c46a",ico:"d-land",
+    tag:"Design · Build · Maintain",
+    h1:"Lawns & Landscapes That Turn Heads.",
+    sub:"Full-service landscaping — design, installation, and maintenance that keeps your yard beautiful.",
+    svcH2:"Landscaping Services",whyH2:"Your trusted landscaping team.",ctaH2:"Ready for the yard of your dreams?",
+    services:[["Lawn Care","Mowing, fertilization, and seasonal cleanups."],["Design & Build","Custom landscape design and installation."],["Hardscaping","Patios, walkways, and outdoor living spaces."],["Cleanups","Spring and fall property cleanups."]],
+    reviews:[["Our yard has never looked better. The design is gorgeous.","Aisha K.","Homeowner"],["Reliable weekly service and the crew is always friendly.","Paul S.","Homeowner"],["They transformed our backyard into a real retreat.","Nina F.","Homeowner"]]},
+  remodeling:{name:"Renova Remodeling",label:"Remodeling",acc:"#7048e8",acc2:"#9171f0",ico:"d-remodel",
+    tag:"Kitchens · Baths · Additions",
+    h1:"Your Dream Space, Beautifully Built.",
+    sub:"Full-service remodeling with transparent timelines and craftsmanship you'll love for years.",
+    svcH2:"Remodeling Services",whyH2:"Your trusted remodeling team.",ctaH2:"Dreaming of a remodel? Let's plan it.",
+    services:[["Kitchen Remodels","Modern, functional kitchens built to fit your life."],["Bathroom Remodels","Spa-like bathrooms, on time and on budget."],["Home Additions","Add space and value with a seamless addition."],["Basement Finishing","Turn unused space into a room you'll love."]],
+    reviews:[["Our kitchen remodel was flawless and finished on schedule.","Rachel T.","Homeowner"],["Clear communication the whole way. Zero surprises.","Victor H.","Homeowner"],["They turned our basement into an amazing family room.","Megan B.","Homeowner"]]},
+  home:{name:"HomePro Services",label:"Home Services",acc:"#e8590c",acc2:"#fa7e34",ico:"d-home",
+    tag:"One Call · All Your Home Needs",
+    h1:"One Call for All Your Home Needs.",
+    sub:"Trusted handyman and home services — repairs, installs, painting, and more, done right.",
+    svcH2:"Home Services You Can Rely On",whyH2:"Your trusted home-service pros.",ctaH2:"Got a to-do list? We've got you.",
+    services:[["Handyman Repairs","The fixes on your list, handled in one visit."],["Painting","Interior and exterior painting done clean."],["Installations","TVs, fixtures, shelving, and more."],["Maintenance","Seasonal upkeep to protect your home."]],
+    reviews:[["Knocked out my whole to-do list in one afternoon. Amazing.","Jordan P.","Homeowner"],["Painted our living room and it looks professional. Tidy too.","Carmen E.","Homeowner"],["My go-to for anything around the house now.","Will A.","Homeowner"]]}
+};
+
+function param(){ const t=new URLSearchParams(location.search).get('trade'); return TRADES[t]?t:'plumbing'; }
+function render(key){
+  const d=TRADES[key], r=document.documentElement.style;
+  r.setProperty('--acc',d.acc); r.setProperty('--acc2',d.acc2);
+  document.title = d.name + " — Demo Site by Supernova";
+  const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
+  set('brandName',d.name); set('brandMark',d.name[0]); set('footName',d.name);
+  set('heroTag',d.tag); set('heroH1',d.h1); set('heroSub',d.sub);
+  set('svcH2',d.svcH2); set('whyH2',d.whyH2); set('ctaH2',d.ctaH2);
+  document.getElementById('heroIco').innerHTML='<use href="#'+d.ico+'"/>';
+  document.getElementById('whyIco').innerHTML='<use href="#'+d.ico+'"/>';
+  document.getElementById('svcGrid').innerHTML = d.services.map(s=>
+    `<div class="svc"><div class="si"><svg><use href="#${d.ico}"/></svg></div><h4>${s[0]}</h4><p>${s[1]}</p></div>`).join('');
+  document.getElementById('revGrid').innerHTML = d.reviews.map(v=>
+    `<div class="rev"><span class="stars">★★★★★</span><p>"${v[0]}"</p><div class="who"><span class="av">${v[1][0]}</span><div><div class="nm">${v[1]}</div><div class="lc">${v[2]}</div></div></div></div>`).join('');
+}
+const cur=param();
+render(cur);
+// build switcher
+const sel=document.getElementById('tradeSwitch');
+Object.keys(TRADES).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=TRADES[k].label;if(k===cur)o.selected=true;sel.appendChild(o);});
+sel.addEventListener('change',()=>{location.href='demo-site.html?trade='+sel.value;});
+</script>
+</body>
+</html>

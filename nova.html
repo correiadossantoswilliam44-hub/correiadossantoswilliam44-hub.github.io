@@ -619,7 +619,7 @@ if (!reduced && !saveData) try {
   const canvas = document.getElementById('nova-fx');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, alpha:false, powerPreference:'high-performance' });
   renderer.setClearColor(0x000000, 1);              // black -> transparent under CSS screen blend
-  const DPR = innerWidth < 700 ? 0.6 : 1.0;         // lighter on phones for smooth performance
+  const DPR = innerWidth < 700 ? 0.5 : 1.0;         // lighter render buffer on phones for smooth scrolling
   renderer.setPixelRatio(DPR);
   renderer.setSize(innerWidth, innerHeight);
 
@@ -695,20 +695,24 @@ if (!reduced && !saveData) try {
   if(reduced){ target=prog=0.30; }
   const clock=new THREE.Clock();
   let running=true, disabled=false, frames=0, t0=0, checked=false;
-  function loop(){
+  const FRAME_MS = innerWidth < 700 ? 1000/30 : 0;  // cap phones at 30fps so scrolling keeps GPU headroom; desktop uncapped
+  let lastFrame = 0;
+  function loop(ts){
     if(disabled) return;
+    if(running) requestAnimationFrame(loop);
+    if(FRAME_MS && (ts||0) - lastFrame < FRAME_MS) return;   // throttle: skip this frame
+    lastFrame = ts||0;
     uniforms.uTime.value += clock.getDelta();
     prog += (target-prog)*0.09; uniforms.uProgress.value=prog;
     mx+=(pmx-mx)*0.05; my+=(pmy-my)*0.05; uniforms.uPointer.value.set(mx,my);
     renderer.render(scene, camera);
-    if(!checked){                                    // FPS watchdog — only fall back to the poster if the device truly can't cope
+    if(!checked){                                    // FPS watchdog — fall back to the poster only if the device truly can't cope
       const now=performance.now();
       if(t0===0){ if(now>1500) t0=now; }             // warm-up: skip the first 1.5s of load jank (shader compile, fonts, layout)
       else { frames++; if(now-t0>2000){ checked=true; // then sample steady-state over a full 2s window
-        if(frames/((now-t0)/1000) < 30){ disabled=true; try{renderer.dispose();}catch(e){} canvas.style.display='none'; return; }
+        if(frames/((now-t0)/1000) < 22){ disabled=true; try{renderer.dispose();}catch(e){} canvas.style.display='none'; return; }
       }}
     }
-    if(running) requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
   document.addEventListener('visibilitychange', ()=>{ running=!document.hidden; if(running && !disabled) requestAnimationFrame(loop); });

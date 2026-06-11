@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script>document.documentElement.classList.add('js');</script>
 <style>
 :root{
   --void:#03040c;--deep:#070a18;--space:#0d1230;
@@ -259,10 +260,12 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 @media(max-width:600px){.mcta{display:block}}
 @media(prefers-reduced-motion:reduce){.mcta{transition:none}}
 
-.reveal{opacity:0;transform:translateY(22px);filter:blur(6px);transition:opacity .7s var(--e-out),transform .7s var(--e-out),filter .7s var(--e-out)}
-.reveal.in{opacity:1;transform:none;filter:blur(0)}
-.stagger>*{opacity:0;transform:translateY(22px);filter:blur(6px)}
-.stagger.in>*{opacity:1;transform:none;filter:blur(0);transition:opacity .6s var(--e-out),transform .6s var(--e-out),filter .6s var(--e-out);transition-delay:calc(var(--i,0) * 70ms)}
+/* Reveal-on-scroll: content is visible by DEFAULT (robust if JS is slow/off/blocked);
+   only when the boot script adds `.js` to <html> do we hide-then-animate on scroll. */
+.js .reveal{opacity:0;transform:translateY(22px);filter:blur(6px);transition:opacity .7s var(--e-out),transform .7s var(--e-out),filter .7s var(--e-out)}
+.js .reveal.in{opacity:1;transform:none;filter:blur(0)}
+.js .stagger>*{opacity:0;transform:translateY(22px);filter:blur(6px)}
+.js .stagger.in>*{opacity:1;transform:none;filter:blur(0);transition:opacity .6s var(--e-out),transform .6s var(--e-out),filter .6s var(--e-out);transition-delay:calc(var(--i,0) * 70ms)}
 
 /* Calm dark backing behind each section heading so it reads instantly over the
    moving background. Ambient support, not a distraction; always on (not gated on
@@ -330,7 +333,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   /* Reduce-motion: drop movement/blur but keep a gentle opacity fade for scroll reveals (vestibular-safe) */
-  .reveal,.stagger>*{transform:none!important;filter:none!important;transition:opacity .6s ease!important}
+  .js .reveal,.js .stagger>*{transform:none!important;filter:none!important;transition:opacity .6s ease!important}
 }
 </style>
 </head>

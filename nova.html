@@ -29,6 +29,9 @@
   --radius:18px;--maxw:1180px;
   --e-out:cubic-bezier(.16,1,.3,1);
   --e-inout:cubic-bezier(.65,0,.35,1);
+  /* Dark halos that keep text legible when the supernova shader flares bright behind it */
+  --legible:0 1px 2px rgba(3,4,12,.6),0 2px 14px rgba(3,4,12,.5);
+  --legible-strong:0 1px 3px rgba(3,4,12,.8),0 2px 22px rgba(3,4,12,.64);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -45,8 +48,15 @@ a{color:inherit;text-decoration:none}
 #bgvid{position:fixed;inset:0;z-index:-2;width:100vw;height:100vh;object-fit:cover;display:block;pointer-events:none}
 #nova-fx{position:fixed;inset:0;z-index:-1;width:100vw;height:100vh;pointer-events:none;mix-blend-mode:screen}
 .scrim{position:fixed;inset:0;z-index:-1;pointer-events:none;background:
-  linear-gradient(180deg,rgba(3,4,12,.5),rgba(3,4,12,.30) 38%,rgba(3,4,12,.62)),
-  radial-gradient(125% 85% at 50% 42%,transparent 55%,rgba(3,4,12,.5) 100%);}
+  linear-gradient(180deg,rgba(3,4,12,.52),rgba(3,4,12,.38) 40%,rgba(3,4,12,.64)),
+  radial-gradient(125% 88% at 50% 45%,transparent 52%,rgba(3,4,12,.5) 100%);}
+
+/* ── Legibility over the animated supernova ──────────────────────────────
+   Text that sits directly on the background (no card behind it) gets a dark
+   halo so it stays readable when the shader flares gold/white-hot mid-scroll. */
+.pill,.eyebrow,.sec-head p,.phase-num,.phase-body h3,.phase-body p,
+.trades-note,.final-cta p,.hlbl,.scroll-hint{text-shadow:var(--legible)}
+.sec-head h2{text-shadow:var(--legible-strong)}
 
 .ic{display:inline-block;vertical-align:middle;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
@@ -218,7 +228,7 @@ section{padding:100px 0;position:relative}
 .price-card .btn{width:100%;justify-content:center}
 
 .final-cta{text-align:center;padding:130px 24px;position:relative}
-.final-cta h2{font-size:clamp(32px,5vw,56px);font-weight:900;margin-bottom:18px;max-width:780px;margin-inline:auto;text-shadow:0 2px 50px rgba(0,0,0,.5)}
+.final-cta h2{font-size:clamp(32px,5vw,56px);font-weight:900;margin-bottom:18px;max-width:780px;margin-inline:auto;text-shadow:var(--legible-strong),0 2px 50px rgba(0,0,0,.5)}
 .final-cta p{color:var(--muted);font-size:19px;max-width:540px;margin:0 auto 34px}
 
 footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-size:14px;background:rgba(3,4,12,.6)}
@@ -407,7 +417,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
     <div class="sec-head reveal">
       <span class="eyebrow">What we build</span>
       <h2>Everything we deliver, phase by phase</h2>
-      <p>Each phase of the star is a real piece of your growth, here's exactly what you get.</p>
+      <p>Each phase of the star is a real piece of your growth. Here's exactly what you get.</p>
     </div>
     <div class="grid stagger">
       <div class="card"><div class="ico"><svg><use href="#i-nebula"/></svg></div><div class="card-phase">Phase 1 · Nebula</div><h3>Discovery &amp; Research</h3><p>We dig into your business, your market, and your competitors to find exactly where you're losing customers online.</p></div>
@@ -469,20 +479,20 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
     <div class="sec-head reveal">
       <span class="eyebrow">Live Demo</span>
       <h2>Don't take our word for it. Call it.</h2>
-      <p>Ring the number below and our AI receptionist picks up — exactly like it would for your business. Ask it anything, or book an appointment.</p>
+      <p>Ring the number below and our AI receptionist picks up, exactly like it would for your business. Ask it anything, or book an appointment.</p>
     </div>
     <!-- LIVE DEMO. Number: Vapi line +18572287393 (assistant daed425e-d529-46a0-9a3e-ef80dfcd80b5).
          To add a recorded-call player later: drop /ai-demo-call.mp3 and re-add an <audio> block. -->
     <div class="demo-card reveal">
       <div class="demo-ring"><svg><use href="#s-phone"/></svg></div>
       <a class="demo-num" href="tel:+18572287393">(857) 228‑7393</a>
-      <p class="demo-sub">Available 24/7 — it answers in one ring and talks like a real receptionist. Call it and hear for yourself.</p>
+      <p class="demo-sub">Available 24/7. It answers in one ring and talks like a real receptionist. Call it and hear for yourself.</p>
       <div class="demo-cta">
         <a class="btn btn-glow" href="tel:+18572287393">Call the AI now</a>
         <a class="btn btn-ghost" href="#contact">Get this for my business</a>
       </div>
       <span class="demo-note">Go ahead — ask about hours, pricing, or try to book an appointment.</span>
-      <span class="demo-or">— or hear a real call —</span>
+      <span class="demo-or">or hear a real call</span>
       <span class="demo-soon-badge">Recorded demo · Coming soon</span>
     </div>
   </div>

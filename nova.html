@@ -144,6 +144,23 @@ section{padding:100px 0;position:relative}
 .trade h4{font-size:16px;font-weight:600}
 .trades-note{text-align:center;color:var(--muted);font-size:15px;margin-top:30px}
 
+/* ── Clickability affordances: make interactive elements obviously tappable ── */
+a,button,.trade,.work-card{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.btn:focus-visible,.trade:focus-visible,.work-card:focus-visible{outline-color:var(--core)}
+/* Trade tiles open live demos — give them a persistent "opens a site" arrow */
+.trade{position:relative}
+.trade::after{content:"\2197";position:absolute;top:9px;right:13px;font-family:'Inter';font-size:15px;font-weight:700;color:var(--core);opacity:.4;transition:opacity .3s var(--e-out),transform .3s var(--e-out)}
+.trade:hover::after,.trade:focus-visible::after{opacity:1;transform:translate(2px,-2px)}
+/* Demo card badge nudges on hover so the whole card reads as clickable */
+.work-card .sample-badge{transition:transform .3s var(--e-out)}
+.work-card:hover .sample-badge{transform:translateX(3px)}
+/* The phone number is tappable */
+.demo-num{transition:transform .25s var(--e-out),filter .25s var(--e-out)}
+.demo-num:hover{transform:scale(1.03);filter:brightness(1.12)}
+/* Inline text links underline on hover */
+.trades-note a:hover{text-decoration:underline}
+
 .grid{display:grid;gap:22px;grid-template-columns:repeat(3,1fr)}
 .card{background:rgba(9,13,28,0.82);border:1px solid var(--border);border-radius:var(--radius);padding:30px;transition:transform .4s var(--e-out),border-color .4s var(--e-out),background .4s var(--e-out);backdrop-filter:blur(14px)}
 .card:hover{transform:translateY(-6px);border-color:rgba(155,107,255,.4);background:rgba(16,22,44,0.88)}

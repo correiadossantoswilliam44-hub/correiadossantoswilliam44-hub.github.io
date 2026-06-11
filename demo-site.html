@@ -36,6 +36,9 @@ img{max-width:100%}
 .ribbon{background:linear-gradient(120deg,#070a18,#1a1340);color:#eef2ff;font-size:13px;font-weight:500}
 .ribbon .wrap{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:46px;flex-wrap:wrap;padding-top:7px;padding-bottom:7px}
 .ribbon a.rib-cta{color:#ffd76b;font-weight:700;white-space:nowrap}
+.ribbon a.rib-back{display:inline-flex;align-items:center;gap:6px;color:#eef2ff;font-weight:700;white-space:nowrap;padding:6px 13px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(255,255,255,.06);transition:background .2s,border-color .2s,transform .2s var(--e)}
+.ribbon a.rib-back:hover{background:rgba(255,255,255,.13);border-color:rgba(255,215,107,.5);transform:translateX(-3px)}
+@media(max-width:920px){.ribbon .rib-left{display:none}}
 .ribbon .rib-left{display:flex;align-items:center;gap:9px}
 .spark{width:7px;height:7px;border-radius:50%;background:#ffd76b;box-shadow:0 0 9px #ffd76b;flex-shrink:0}
 .switch{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#9aa6c8}
@@ -154,6 +157,7 @@ footer{padding:40px 0;border-top:1px solid var(--line);color:var(--body);font-si
 
 <div class="ribbon">
   <div class="wrap">
+    <a class="rib-back" href="/nova.html">← Back to Supernova</a>
     <span class="rib-left"><span class="spark"></span> Sample demo built by Supernova — this is what your site could look like.</span>
     <span class="switch">View trade:
       <select id="tradeSwitch" aria-label="Switch trade demo"></select>

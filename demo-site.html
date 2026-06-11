@@ -133,6 +133,8 @@ footer{padding:40px 0;border-top:1px solid var(--line);color:var(--body);font-si
 
 .callfab{position:fixed;right:18px;bottom:18px;z-index:50;display:none;align-items:center;gap:8px;background:linear-gradient(120deg,var(--acc),var(--acc2));color:#fff;padding:13px 18px;border-radius:999px;font-weight:700;font-family:'Plus Jakarta Sans';box-shadow:0 12px 30px -8px var(--acc)}
 @media(max-width:780px){.callfab{display:inline-flex}}
+.copy-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);z-index:60;background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:0 14px 34px -10px rgba(16,24,43,.6);opacity:0;pointer-events:none;transition:opacity .3s var(--e),transform .3s var(--e)}
+.copy-toast.show{opacity:1;transform:translate(-50%,0)}
 
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -271,6 +273,24 @@ footer{padding:40px 0;border-top:1px solid var(--line);color:var(--body);font-si
 </footer>
 
 <a class="callfab" id="fabCall" href="tel:+18572287393"><svg class="svgi"><use href="#d-phone"/></svg> Call</a>
+<div class="copy-toast" id="copyToast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  // Smart tel: links — dial on phones; on desktop (where tel: opens nothing) copy the number + toast.
+  if(matchMedia('(hover:none) and (pointer:coarse)').matches) return;   // phone/tablet: let it dial
+  var toast=document.getElementById('copyToast'), tT;
+  function show(msg){ if(!toast) return; toast.textContent=msg; toast.classList.add('show'); clearTimeout(tT); tT=setTimeout(function(){ toast.classList.remove('show'); },2800); }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="tel:"]'); if(!a) return;
+    e.preventDefault();
+    var num=a.getAttribute('href').replace(/^tel:/,'').trim();
+    var pretty=num.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'($1) $2-$3');
+    var done=function(){ show('Copied '+pretty+' — call it from your phone'); };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(num).then(done,done); } else { done(); }
+  });
+})();
+</script>
 
 <script>
 const TRADES = {

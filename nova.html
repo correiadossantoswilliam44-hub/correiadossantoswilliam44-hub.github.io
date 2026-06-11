@@ -275,6 +275,10 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 .bloom.go{animation:bloomburst .62s cubic-bezier(.16,1,.3,1) forwards}
 @keyframes bloomburst{0%{opacity:0;transform:scale(.4)}16%{opacity:.8}100%{opacity:0;transform:scale(1.7)}}
 
+/* Toast shown when a tel: number is copied on desktop (where dialing isn't possible) */
+.copy-toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,12px);z-index:70;background:rgba(7,10,24,.96);border:1px solid var(--border);color:var(--text);font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;pointer-events:none;backdrop-filter:blur(10px);transition:opacity .3s var(--e-out),transform .3s var(--e-out)}
+.copy-toast.show{opacity:1;transform:translate(-50%,0)}
+
 /* Mobile performance — backdrop-blur and reveal-blur are the jank sources; drop them on small screens */
 @media(max-width:760px){
   header,.pill,.card,.trade,.price-card,.testi,.demo-card,.phase-node,.work-card{backdrop-filter:none}
@@ -593,6 +597,25 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 
 <div class="mcta" id="mcta"><a class="btn btn-glow" href="/get-started.html">Get my free preview →</a></div>
 
+<div class="copy-toast" id="copyToast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  // Smart tel: links — dial on phones; on desktop (where tel: opens nothing) copy the number + toast.
+  if(matchMedia('(hover:none) and (pointer:coarse)').matches) return;   // phone/tablet: let it dial
+  var toast=document.getElementById('copyToast'), tT;
+  function show(msg){ if(!toast) return; toast.textContent=msg; toast.classList.add('show'); clearTimeout(tT); tT=setTimeout(function(){ toast.classList.remove('show'); },2800); }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="tel:"]'); if(!a) return;
+    e.preventDefault();
+    var num=a.getAttribute('href').replace(/^tel:/,'').trim();
+    var pretty=num.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'($1) $2-$3');
+    var done=function(){ show('Copied '+pretty+' — call it from your phone'); };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(num).then(done,done); } else { done(); }
+  });
+})();
+</script>
+
 <footer>
   <div class="wrap foot-row">
     <div class="logo" style="font-size:17px"><img class="logo-img" src="/dash-atom.png" alt=""/><span class="logo-word" role="img" aria-label="Supernova"></span></div>
@@ -710,7 +733,10 @@ if (!reduced && !saveData) try {
   const canvas = document.getElementById('nova-fx');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, alpha:false, powerPreference:'high-performance' });
   renderer.setClearColor(0x000000, 1);              // black -> transparent under CSS screen blend
-  const DPR = innerWidth < 700 ? 0.5 : 1.0;         // lighter render buffer on phones for smooth scrolling
+  // Per-device render tier: phones get a light buffer; tablets medium; desktops full + parallax.
+  const coarse = matchMedia('(pointer:coarse)').matches;
+  const tier = innerWidth < 700 ? 'phone' : (innerWidth < 1100 || coarse) ? 'tablet' : 'desktop';
+  const DPR = tier === 'phone' ? 0.5 : tier === 'tablet' ? 0.7 : 1.0;
   renderer.setPixelRatio(DPR);
   renderer.setSize(innerWidth, innerHeight);
 
@@ -780,13 +806,13 @@ if (!reduced && !saveData) try {
   let target=0, prog=0, mx=0, my=0, pmx=0, pmy=0;
   function onScroll(){ const m=document.body.scrollHeight-innerHeight; target=m>0?Math.min(Math.max(scrollY/m,0),1):0; }
   addEventListener('scroll', onScroll, {passive:true}); onScroll();
-  if(!reduced) addEventListener('pointermove', e=>{ pmx=(e.clientX/innerWidth-0.5); pmy=-(e.clientY/innerHeight-0.5); }, {passive:true});
+  if(tier === 'desktop' && !reduced) addEventListener('pointermove', e=>{ pmx=(e.clientX/innerWidth-0.5); pmy=-(e.clientY/innerHeight-0.5); }, {passive:true});
   addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); uniforms.uRes.value.set(innerWidth*DPR, innerHeight*DPR); });
 
   if(reduced){ target=prog=0.30; }
   const clock=new THREE.Clock();
   let running=true, disabled=false, frames=0, t0=0, checked=false;
-  const FRAME_MS = innerWidth < 700 ? 1000/30 : 0;  // cap phones at 30fps so scrolling keeps GPU headroom; desktop uncapped
+  const FRAME_MS = tier === 'phone' ? 1000/30 : tier === 'tablet' ? 1000/40 : 0;  // phone 30fps, tablet 40fps, desktop uncapped
   let lastFrame = 0;
   function loop(ts){
     if(disabled) return;

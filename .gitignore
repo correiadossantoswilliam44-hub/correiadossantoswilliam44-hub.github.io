@@ -1,0 +1,16 @@
+# ── Keep ALL Claude Code config & skills OUT of this public repo ──
+# These are private business IP (skills, playbooks, templates) and local-only
+# settings. They live on your machine but must never be published.
+.claude/
+
+# ── Secrets / environment — never commit ──
+.env
+.env.*
+!.env.example
+*.local
+secrets.*
+service-account*.json
+
+# ── OS / editor noise ──
+.DS_Store
+Thumbs.db

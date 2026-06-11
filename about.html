@@ -74,9 +74,10 @@ nav{display:flex;align-items:center;justify-content:space-between;height:72px}
 .brand-sub{color:var(--core);font-size:13px;letter-spacing:.28em;text-transform:uppercase;margin-top:10px;font-weight:600}
 
 /* Hero */
-.about-hero{padding:48px 0 36px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px}
+.about-hero{padding:48px 0 36px;display:flex;flex-direction:row;align-items:center;text-align:left;gap:48px}
+.about-hero-text{flex:1;min-width:0}
 .avatar{flex-shrink:0;position:relative;line-height:0}
-.avatar img{width:min(280px,72vw);height:auto;display:block;filter:drop-shadow(0 18px 34px rgba(0,0,0,.5)) drop-shadow(0 6px 50px rgba(155,107,255,.22))}
+.avatar img{width:min(280px,32vw);height:auto;display:block;filter:drop-shadow(0 18px 34px rgba(0,0,0,.5)) drop-shadow(0 6px 50px rgba(155,107,255,.22))}
 .eyebrow{color:var(--core);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;display:block}
 .about-hero h1{font-size:clamp(34px,5.5vw,56px);font-weight:800;margin-bottom:10px}
 .about-hero .role{font-size:clamp(16px,2.2vw,19px);color:var(--muted);font-weight:500}
@@ -132,7 +133,8 @@ footer{border-top:1px solid var(--border);padding:40px 0;color:var(--dim);font-s
 .reveal.in{opacity:1;transform:none;filter:blur(0)}
 
 @media(max-width:820px){
-  .about-hero{gap:18px}
+  .about-hero{flex-direction:column;align-items:center;text-align:center;gap:18px}
+  .about-hero-text{text-align:center}
   .cred-grid,.care-grid{grid-template-columns:1fr}
   .nav-links a:not(.active):not(.btn){display:none}
   .brand-hero{text-align:center}
@@ -185,7 +187,7 @@ footer{border-top:1px solid var(--border);padding:40px 0;color:var(--dim);font-s
   <!-- Hero -->
   <section class="about-hero">
     <div class="avatar"><img src="william-cutout.png" alt="William Dos Santos, founder of Supernova"/></div>
-    <div>
+    <div class="about-hero-text">
       <span class="eyebrow">Meet the founder</span>
       <h1>William <span class="grad">Dos Santos</span></h1>
       <div class="role">Certified Full-Stack Developer · Founder of Supernova</div>

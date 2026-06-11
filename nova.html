@@ -240,10 +240,11 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 .stagger>*{opacity:0;transform:translateY(22px);filter:blur(6px)}
 .stagger.in>*{opacity:1;transform:none;filter:blur(0);transition:opacity .6s var(--e-out),transform .6s var(--e-out),filter .6s var(--e-out);transition-delay:calc(var(--i,0) * 70ms)}
 
-/* DMT bloom — soft glow materializes behind each section heading as it scrolls in */
+/* Calm dark backing behind each section heading so it reads instantly over the
+   moving background. Ambient support, not a distraction; always on (not gated on
+   scroll) so the heading is legible even before the reveal fires. */
 .sec-head{position:relative;z-index:0}
-.sec-head::before{content:"";position:absolute;left:50%;top:34%;width:min(540px,92%);aspect-ratio:1/1;transform:translate(-50%,-50%) scale(.55);border-radius:50%;background:radial-gradient(circle,rgba(155,107,255,.20),rgba(77,124,255,.12) 42%,transparent 70%);opacity:0;z-index:-1;pointer-events:none;transition:opacity 1.1s var(--e-out),transform 1.3s var(--e-out)}
-.sec-head.in::before{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.sec-head::before{content:"";position:absolute;left:50%;top:44%;width:min(640px,96%);aspect-ratio:1.6/1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(3,4,12,.62),rgba(3,4,12,.34) 46%,transparent 72%);opacity:1;z-index:-1;pointer-events:none}
 
 /* DMT bloom — colored burst on tap/click (spawned via JS); transform+opacity only */
 .bloom{position:fixed;left:0;top:0;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;pointer-events:none;z-index:60;mix-blend-mode:screen;opacity:0;will-change:transform,opacity;background:radial-gradient(circle,var(--bloom-c,#9b6bff) 0%,transparent 66%)}
@@ -707,7 +708,7 @@ if (!reduced && !saveData) try {
         vec2 shake = vec2(
           sin(uTime*96.0)+0.5*sin(uTime*47.0),
           cos(uTime*88.0)+0.5*cos(uTime*59.0)
-        ) * 0.011 * tr;
+        ) * 0.004 * tr;
 
         vec2 uv=(gl_FragCoord.xy-0.5*uRes)/uRes.y;
         uv += uPointer*0.03 + shake;
@@ -721,7 +722,7 @@ if (!reduced && !saveData) try {
         float shellR=mix(0.05,1.5,blast)*(1.0-charge*0.4);
         float shell=smoothstep(0.60,0.0,abs(r-shellR));
         float core =smoothstep(mix(0.5,0.04,blast),0.0,r);
-        float dens = core*(0.5+1.05*ignite)*(1.0-blast*0.82) + shell*blast*2.1 + flash*smoothstep(0.9,0.0,r)*2.9;
+        float dens = core*(0.5+1.05*ignite)*(1.0-blast*0.82) + shell*blast*2.1 + flash*smoothstep(0.9,0.0,r)*2.0;
         dens *= (0.30 + 1.25*n); dens *= (1.0 - rebirth*0.85); dens=max(dens,0.0);
 
         // richer, more saturated spectrum: blue -> cyan -> magenta -> green -> gold -> white-hot

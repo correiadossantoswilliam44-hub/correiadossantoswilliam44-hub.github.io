@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#03040c"/>
 <title>AI Website Builder for Local Trades | Live in 48 Hours — Supernova</title>
 <meta name="description" content="Supernova is an AI website builder for local trade businesses — plumbers, roofers, HVAC, electricians, landscapers and more. Get a custom website plus a 24/7 AI phone receptionist, live in 48 hours. Flat fee, no monthly lock-in."/>
 <meta name="keywords" content="AI website builder, website builder for trades, plumber website, roofer website, HVAC website, electrician website, local business website, AI receptionist, 48 hour website, contractor website builder"/>
@@ -49,8 +50,10 @@ a{color:inherit;text-decoration:none}
 
 .ic{display:inline-block;vertical-align:middle;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
-header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(3,4,12,.5);border-bottom:1px solid var(--border)}
-nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(3,4,12,.5);border-bottom:1px solid var(--border);transition:background .4s var(--e-out),border-color .4s var(--e-out),box-shadow .4s var(--e-out)}
+header.scrolled{background:rgba(3,4,12,.85);border-bottom-color:rgba(255,255,255,.12);box-shadow:0 10px 34px rgba(0,0,0,.4)}
+nav{display:flex;align-items:center;justify-content:space-between;height:72px;transition:height .4s var(--e-out)}
+header.scrolled nav{height:60px}
 .logo{display:flex;align-items:center;gap:11px;font-family:'Bricolage Grotesque';font-weight:700;font-size:20px}
 .logo svg{width:26px;height:26px;filter:drop-shadow(0 0 8px rgba(255,215,107,.6))}
 .logo-img{width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(155,107,255,.55))}
@@ -60,9 +63,21 @@ nav{display:flex;align-items:center;justify-content:space-between;height:72px}
 @keyframes wordshine{from{background-position:-160% 0,0 0}to{background-position:260% 0,0 0}}
 .foot-row .logo-word{height:18px}
 .nav-links{display:flex;align-items:center;gap:30px}
-.nav-links a{color:var(--muted);font-size:15px;font-weight:500;transition:color .2s var(--e-out)}
-.nav-links a:hover{color:var(--text)}
-.nav-toggle{display:none;background:none;border:0;color:var(--text);cursor:pointer}
+.nav-links a:not(.btn){position:relative;color:var(--muted);font-size:15px;font-weight:500;transition:color .25s var(--e-out)}
+.nav-links a:not(.btn)::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--violet));transform:scaleX(0);transition:transform .3s var(--e-out)}
+.nav-links a:not(.btn):hover{color:var(--text)}
+.nav-links a:not(.btn):hover::after,.nav-links a:not(.btn).active::after{transform:scaleX(1)}
+.nav-links a:not(.btn).active{color:var(--text)}
+.nav-toggle{display:none;background:none;border:0;color:var(--text);cursor:pointer;padding:8px;margin:-8px}
+.nav-toggle .bars{position:relative;display:block;width:24px;height:16px}
+.nav-toggle .bars i{position:absolute;left:0;right:0;height:2px;border-radius:2px;background:currentColor;transition:transform .35s var(--e-out),opacity .2s var(--e-out)}
+.nav-toggle .bars i:nth-child(1){top:0}
+.nav-toggle .bars i:nth-child(2){top:7px}
+.nav-toggle .bars i:nth-child(3){top:14px}
+header.nav-open .nav-toggle .bars i:nth-child(1){transform:translateY(7px) rotate(45deg)}
+header.nav-open .nav-toggle .bars i:nth-child(2){opacity:0}
+header.nav-open .nav-toggle .bars i:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.nav-backdrop{display:none}
 
 .btn{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:12px;font-weight:600;font-size:15px;transition:transform .35s var(--e-out),box-shadow .35s var(--e-out);cursor:pointer;border:0;white-space:nowrap;font-family:'Inter';will-change:transform}
 .btn-primary{background:linear-gradient(120deg,var(--blue),var(--violet));color:#fff;box-shadow:0 8px 30px rgba(77,124,255,.4)}
@@ -235,7 +250,18 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   .reveal,.reveal.in,.stagger>*,.stagger.in>*{filter:none}
 }
 
-@media(max-width:860px){.grid,.price-wrap{grid-template-columns:1fr}.trades-grid{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.nav-toggle{display:block}}
+@media(max-width:860px){
+  .grid,.price-wrap{grid-template-columns:1fr}.trades-grid{grid-template-columns:repeat(2,1fr)}
+  header{backdrop-filter:none;background:rgba(3,4,12,.86)}header.scrolled{background:rgba(3,4,12,.94)}
+  .nav-toggle{display:block;position:relative;z-index:61}
+  .nav-links{position:fixed;top:0;right:0;bottom:0;width:min(80vw,330px);flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px;padding:92px 26px 30px;background:rgba(7,10,24,.97);backdrop-filter:blur(20px);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .42s var(--e-out);z-index:60}
+  header.nav-open .nav-links{transform:translateX(0)}
+  .nav-links a:not(.btn){font-size:18px;padding:12px 2px}
+  .nav-links a:not(.btn)::after{display:none}
+  .nav-links a.btn{margin-top:16px;justify-content:center;padding:14px 20px!important}
+  .nav-backdrop{display:block;position:fixed;inset:0;background:rgba(3,4,12,.6);opacity:0;visibility:hidden;transition:opacity .42s var(--e-out),visibility .42s;z-index:55}
+  header.nav-open .nav-backdrop{opacity:1;visibility:visible}
+}
 @media(max-width:600px){
   section{padding:64px 0}
   .wrap{padding:0 18px}
@@ -303,7 +329,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   <div class="wrap">
     <nav>
       <a class="logo" href="#top"><img class="logo-img" src="/dash-atom.png" alt=""/><span class="logo-word" role="img" aria-label="Supernova"></span></a>
-      <div class="nav-links">
+      <div class="nav-links" id="primary-nav">
         <a href="#phases">The Journey</a>
         <a href="#built">Built For</a>
         <a href="#services">Services</a>
@@ -312,9 +338,10 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
         <a href="/about.html">About</a>
         <a class="btn btn-primary" href="/get-started.html" style="padding:10px 20px">Ignite Now</a>
       </div>
-      <button class="nav-toggle" aria-label="Menu" aria-expanded="false"><svg class="ic"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span></button>
     </nav>
   </div>
+  <div class="nav-backdrop"></div>
 </header>
 
 <section class="hero" id="top">
@@ -562,20 +589,36 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   requestAnimationFrame(function(){ requestAnimationFrame(check); });
   addEventListener('load',function(){ setTimeout(check,80); });   // safety pass once layout settles
 
+  var header=document.querySelector('header');
   var tgl=document.querySelector('.nav-toggle');
-  var links=document.querySelector('.nav-links');
-  if(tgl && links){
+  var nav=document.getElementById('primary-nav');
+  var backdrop=document.querySelector('.nav-backdrop');
+  if(header && tgl && nav){
     var setOpen=function(open){
-      if(open){
-        Object.assign(links.style,{display:'flex',position:'absolute',top:'72px',left:'0',right:'0',flexDirection:'column',background:'var(--deep)',padding:'20px',borderBottom:'1px solid var(--border)',gap:'18px'});
-      } else {
-        links.style.cssText='';            // hand control back to the stylesheet (hidden on mobile, flex row on desktop) — also clears stale inline styles on resize
-      }
-      tgl.setAttribute('aria-expanded', open?'true':'false');
+      header.classList.toggle('nav-open',open);
+      tgl.setAttribute('aria-expanded',open?'true':'false');
+      tgl.setAttribute('aria-label',open?'Close menu':'Open menu');
+      document.body.style.overflow=open?'hidden':'';
     };
-    tgl.addEventListener('click',function(){ setOpen(links.style.display!=='flex'); });
-    // Close the menu after tapping a link so it doesn't keep covering the section you jumped to
-    links.addEventListener('click',function(e){ if(e.target.closest('a')) setOpen(false); });
+    tgl.addEventListener('click',function(){ setOpen(!header.classList.contains('nav-open')); });
+    if(backdrop) backdrop.addEventListener('click',function(){ setOpen(false); });
+    nav.querySelectorAll('a').forEach(function(a){ a.addEventListener('click',function(){ setOpen(false); }); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') setOpen(false); });
+    addEventListener('resize',function(){ if(innerWidth>860 && header.classList.contains('nav-open')) setOpen(false); },{passive:true});
+
+    // Solidify the bar once the hero scrolls under it
+    var ticking2=false;
+    function onHdrScroll(){ if(ticking2) return; ticking2=true; requestAnimationFrame(function(){ header.classList.toggle('scrolled', (window.scrollY||window.pageYOffset)>20); ticking2=false; }); }
+    addEventListener('scroll',onHdrScroll,{passive:true}); onHdrScroll();
+
+    // Scroll-spy: light the nav link for the section currently in view
+    if('IntersectionObserver' in window){
+      var its=[].slice.call(nav.querySelectorAll('a[href^="#"]')).map(function(a){ return {a:a,id:a.getAttribute('href').slice(1)}; }).filter(function(x){ return x.id && document.getElementById(x.id); });
+      if(its.length){
+        var spy=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ its.forEach(function(m){ m.a.classList.toggle('active', m.id===en.target.id); }); } }); },{rootMargin:'-45% 0px -50% 0px'});
+        its.forEach(function(m){ spy.observe(document.getElementById(m.id)); });
+      }
+    }
   }
 })();
 </script>

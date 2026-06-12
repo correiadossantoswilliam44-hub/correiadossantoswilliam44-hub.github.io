@@ -45,6 +45,18 @@ img{max-width:100%}
 .switch select:hover,.switch select:focus-visible{border-color:rgba(255,215,107,.55);background:rgba(255,255,255,.14);outline:0}
 /* The popup list renders on the OS's light background — give options dark text or they're invisible */
 .switch select option{color:#10182b;background:#fff}
+/* AI tour — voice guide pill (ribbon) + floating mute toggle */
+.vg-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;border:1px solid rgba(255,215,107,.45);background:rgba(255,255,255,.06);color:#ffd76b;font:600 12.5px 'Inter',sans-serif;cursor:pointer;white-space:nowrap;transition:border-color .2s,background .2s;animation:vgbreathe 3s ease-in-out infinite}
+.vg-pill:hover{background:rgba(255,255,255,.12);border-color:rgba(255,215,107,.8)}
+.vg-pill.on{animation:none;color:#23d5ab;border-color:rgba(35,213,171,.55)}
+.vg-pill svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes vgbreathe{0%,100%{box-shadow:0 0 8px rgba(255,215,107,.15)}50%{box-shadow:0 0 18px rgba(255,215,107,.45)}}
+.vg-fab{position:fixed;right:18px;bottom:18px;z-index:51;width:44px;height:44px;border-radius:50%;display:none;place-items:center;border:1px solid var(--line);background:#fff;color:var(--body);cursor:pointer;box-shadow:0 10px 26px -12px rgba(16,24,43,.45);transition:color .2s,transform .2s var(--e)}
+.vg-fab.show{display:grid}
+.vg-fab:hover{transform:translateY(-2px)}
+.vg-fab.on{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
+.vg-fab svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:780px){.vg-fab{bottom:78px}}
 
 /* header */
 header{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
@@ -174,6 +186,7 @@ body.swapping .morph{opacity:0;transform:translateY(12px)}
     <span class="switch">View trade:
       <select id="tradeSwitch" aria-label="Switch trade demo"></select>
     </span>
+    <button class="vg-pill" id="vgPill" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19z"/><path d="M15 9.5a4 4 0 0 1 0 5"/><path d="M17.5 7a8 8 0 0 1 0 10"/></svg><span class="vg-t">AI tour</span></button>
     <a class="rib-cta" href="/get-started.html">Get yours in 48 hrs →</a>
   </div>
 </div>
@@ -285,6 +298,7 @@ body.swapping .morph{opacity:0;transform:translateY(12px)}
 
 <a class="callfab" id="fabCall" href="tel:+12136035921"><svg class="svgi"><use href="#d-phone"/></svg> Call</a>
 <div class="copy-toast" id="copyToast" role="status" aria-live="polite"></div>
+<button class="vg-fab" id="vgFab" aria-pressed="false" aria-label="Unmute AI tour"><svg viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19z"/><path d="M15 9.5a4 4 0 0 1 0 5"/><path d="M17.5 7a8 8 0 0 1 0 10"/></svg></button>
 
 <script>
 (function(){
@@ -394,6 +408,109 @@ sel.addEventListener('change',()=>{
   document.body.classList.add('swapping');
   setTimeout(()=>{ swap(); requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('swapping'))); },320);
 });
+
+/* ── AI tour: the receptionist pitches the demo — what you get & how it lands
+   you more clients. Same hybrid engine as nova.html (cinematic /voice/ MP3s
+   through a live reverb chain when present, browser voice otherwise), and the
+   same shared on/off preference, so a visitor who enabled the guide on the
+   main page gets greeted here automatically on their first tap. */
+(function(){
+  var LINES={
+    'demo-greeting':"This whole site? Yours in forty-eight hours — with me on your phones, answering the calls you miss and booking the jobs. That's how you land more clients. Scroll — I'll show you.",
+    'demo-services':"Your services, front and center — so Google finds you, and customers pick you.",
+    'demo-why':"While you're on a job, I'm on the phones. Every missed call becomes a booked one.",
+    'demo-reviews':"Happy customers leave reviews. Reviews bring the next one. The cycle feeds itself.",
+    'demo-book':"Like what you see? One flat fee — live in forty-eight hours. Or call the number, and ask me yourself."
+  };
+  var SECTIONS={services:'demo-services',why:'demo-why',reviews:'demo-reviews',book:'demo-book'};
+  var enabled=false, ctx=null, useFiles=false, buffers={}, spoken={}, curSrc=null, curUtter=null;
+
+  fetch('/voice/demo-greeting.mp3',{method:'HEAD'}).then(function(r){ useFiles=!!r.ok; }).catch(function(){});
+
+  function initCtx(){
+    if(ctx) return;
+    var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    ctx=new AC();
+    var rate=ctx.sampleRate, len=Math.floor(rate*2.6), ir=ctx.createBuffer(2,len,rate);
+    for(var ch=0;ch<2;ch++){ var d=ir.getChannelData(ch); for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2); }
+    var master=ctx.createGain(); master.gain.value=.9;
+    var conv=ctx.createConvolver(); conv.buffer=ir;
+    var wet=ctx.createGain(); wet.gain.value=.5;
+    var dry=ctx.createGain(); dry.gain.value=.8;
+    var dl=ctx.createDelay(1); dl.delayTime.value=.27;
+    var fb=ctx.createGain(); fb.gain.value=.28; dl.connect(fb); fb.connect(dl);
+    conv.connect(wet); wet.connect(master); dl.connect(master); dry.connect(master); master.connect(ctx.destination);
+    ctx.__in=function(n){ n.connect(dry); n.connect(conv); n.connect(dl); };
+    if('speechSynthesis' in window) speechSynthesis.getVoices();
+  }
+  function stop(){
+    if(curSrc){ try{curSrc.stop();}catch(e){} curSrc=null; }
+    if('speechSynthesis' in window) speechSynthesis.cancel();
+    curUtter=null;
+  }
+  function pickVoice(){
+    var vs=speechSynthesis.getVoices(), best=null,
+        want=['aria','jenny','guy','google us english','samantha','daniel'];
+    for(var i=0;i<vs.length;i++){ var v=vs[i];
+      if((v.lang||'').indexOf('en')!==0) continue;
+      if(!best) best=v;
+      var n=v.name.toLowerCase();
+      for(var j=0;j<want.length;j++) if(n.indexOf(want[j])>-1) return v;
+    }
+    return best;
+  }
+  function speakSynth(id){
+    if(!('speechSynthesis' in window)) return;
+    var u=new SpeechSynthesisUtterance(LINES[id]);
+    var v=pickVoice(); if(v) u.voice=v;
+    u.rate=.92; u.pitch=.78;
+    u.onend=u.onerror=function(){ if(curUtter===u) curUtter=null; };
+    curUtter=u; speechSynthesis.speak(u);
+  }
+  function speak(id){
+    if(!enabled || !LINES[id] || spoken[id]) return;
+    spoken[id]=true; stop();
+    if(useFiles && ctx){
+      var go=function(buf){ var s=ctx.createBufferSource(); s.buffer=buf; ctx.__in(s);
+        curSrc=s; s.onended=function(){ if(curSrc===s) curSrc=null; }; s.start(); };
+      if(buffers[id]) return go(buffers[id]);
+      fetch('/voice/'+id+'.mp3').then(function(r){ if(!r.ok) throw 0; return r.arrayBuffer(); })
+        .then(function(ab){ return ctx.decodeAudioData(ab); })
+        .then(function(buf){ buffers[id]=buf; go(buf); })
+        .catch(function(){ speakSynth(id); });
+    } else speakSynth(id);
+  }
+
+  var pill=document.getElementById('vgPill'), fab=document.getElementById('vgFab');
+  function setUI(){
+    var pref=null; try{ pref=localStorage.getItem('nova-voice'); }catch(e){}
+    if(pill){ pill.setAttribute('aria-pressed',String(enabled)); pill.classList.toggle('on',enabled);
+      pill.querySelector('.vg-t').textContent=enabled?'Tour on — mute':'AI tour'; }
+    if(fab){ fab.classList.toggle('show',enabled||!!pref); fab.classList.toggle('on',enabled);
+      fab.setAttribute('aria-pressed',String(enabled));
+      fab.setAttribute('aria-label',enabled?'Mute AI tour':'Unmute AI tour'); }
+  }
+  function setEnabled(on,fromUser){
+    enabled=on;
+    try{ localStorage.setItem('nova-voice',on?'on':'off'); }catch(e){}
+    if(on){ initCtx(); if(ctx&&ctx.state==='suspended') ctx.resume(); if(fromUser) speak('demo-greeting'); }
+    else stop();
+    setUI();
+  }
+  if(pill) pill.addEventListener('click',function(){ setEnabled(!enabled,true); });
+  if(fab) fab.addEventListener('click',function(){ setEnabled(!enabled,true); });
+
+  // Guide already on (from the main page)? Arm on the first tap and pitch the demo.
+  var pref=null; try{ pref=localStorage.getItem('nova-voice'); }catch(e){}
+  if(pref==='on') addEventListener('pointerdown',function(){ if(!enabled) setEnabled(true,true); },{once:true,passive:true});
+  setUI();
+
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ var id=SECTIONS[en.target.id]; if(en.isIntersecting&&id) speak(id); }); },{threshold:.3});
+    Object.keys(SECTIONS).forEach(function(sid){ var el=document.getElementById(sid); if(el) io.observe(el); });
+  }
+  document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); });
+})();
 
 // Scroll reveals — staggered, IntersectionObserver-driven, reduced-motion safe
 function wireReveals(instant){

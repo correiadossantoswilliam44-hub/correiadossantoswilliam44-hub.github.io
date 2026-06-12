@@ -30,6 +30,16 @@ entire script about five times over. It's a one-time generation.
 | `pricing.mp3` | One flat fee for a site you own forever. I'm one ninety-nine a month — and I never take a day off. |
 | `contact.mp3` | Ready to ignite? Tell me about your business — your free preview lands in forty-eight hours. |
 
+And 5 more for the trade demo sites (`demo-site.html` — the "AI tour"):
+
+| File | Line |
+|---|---|
+| `demo-greeting.mp3` | This whole site? Yours in forty-eight hours — with me on your phones, answering the calls you miss and booking the jobs. That's how you land more clients. Scroll — I'll show you. |
+| `demo-services.mp3` | Your services, front and center — so Google finds you, and customers pick you. |
+| `demo-why.mp3` | While you're on a job, I'm on the phones. Every missed call becomes a booked one. |
+| `demo-reviews.mp3` | Happy customers leave reviews. Reviews bring the next one. The cycle feeds itself. |
+| `demo-book.mp3` | Like what you see? One flat fee — live in forty-eight hours. Or call the number, and ask me yourself. |
+
 ## Step 2 — Drop them in
 
 Create a folder named `voice` in the repo root and put the 8 MP3s inside:

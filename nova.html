@@ -284,6 +284,20 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 .copy-toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,12px);z-index:70;background:rgba(7,10,24,.96);border:1px solid var(--border);color:var(--text);font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;pointer-events:none;backdrop-filter:blur(10px);transition:opacity .3s var(--e-out),transform .3s var(--e-out)}
 .copy-toast.show{opacity:1;transform:translate(-50%,0)}
 
+/* ── AI voice guide: opt-in pill in the hero + persistent mute toggle ── */
+.voice-pill{display:inline-flex;align-items:center;gap:9px;margin-top:24px;padding:11px 20px;border-radius:999px;border:1px solid rgba(255,215,107,.35);background:rgba(7,10,24,.55);color:var(--text);font:600 14px 'Inter',sans-serif;cursor:pointer;backdrop-filter:blur(8px);transition:border-color .3s var(--e-out),transform .3s var(--e-out);animation:voicebreathe 3s var(--e-inout) infinite}
+.voice-pill:hover{transform:translateY(-2px);border-color:rgba(255,215,107,.7)}
+.voice-pill.on{animation:none;border-color:rgba(35,213,171,.6);box-shadow:0 0 22px rgba(35,213,171,.25)}
+.voice-pill .vic{width:18px;height:18px;color:var(--core)}
+@keyframes voicebreathe{0%,100%{box-shadow:0 0 14px rgba(255,215,107,.18)}50%{box-shadow:0 0 30px rgba(255,215,107,.42)}}
+.voice-fab{position:fixed;right:18px;bottom:18px;z-index:46;width:46px;height:46px;border-radius:50%;display:none;place-items:center;border:1px solid var(--border);background:rgba(7,10,24,.85);color:var(--muted);cursor:pointer;backdrop-filter:blur(10px);transition:color .25s,border-color .25s,transform .25s var(--e-out)}
+.voice-fab.show{display:grid}
+.voice-fab:hover{transform:translateY(-2px);color:var(--text)}
+.voice-fab.on{color:var(--core);border-color:rgba(255,215,107,.5);box-shadow:0 0 18px rgba(255,215,107,.25)}
+.voice-fab .vic{width:20px;height:20px}
+@media(max-width:600px){.voice-fab{bottom:84px}}
+@media(prefers-reduced-motion:reduce){.voice-pill{animation:none}}
+
 /* Mobile performance — backdrop-blur and reveal-blur are the jank sources; drop them on small screens */
 @media(max-width:760px){
   header,.pill,.card,.trade,.price-card,.testi,.demo-card,.phase-node,.work-card{backdrop-filter:none}
@@ -367,6 +381,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   <symbol id="s-launch" viewBox="0 0 24 24"><path d="M5 14c-1.5 1.2-2 5-2 5s3.8-.5 5-2"/><path d="M14.5 5.5C18 9 16 15 12 19l-4-4C12 11 11 9 14.5 5.5z"/><path d="M14.5 5.5C17 4 20 4 20 4s0 3-1.5 5.5"/><circle cx="14.5" cy="9.5" r="1.4"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></symbol>
   <symbol id="i-star-fill" viewBox="0 0 24 24"><path d="M12 2.5l2.7 5.9 6.3.7-4.7 4.3 1.3 6.4L12 16.9 6.1 19.8l1.3-6.4L2.7 9.1l6.3-.7z"/></symbol>
+  <symbol id="i-voice" viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19z"/><path d="M15 9.5a4 4 0 0 1 0 5"/><path d="M17.5 7a8 8 0 0 1 0 10"/></symbol>
 </defs></svg>
 
 <header>
@@ -397,6 +412,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
       <a class="btn btn-glow" href="/get-started.html">Get Your AI Site in 48hrs</a>
       <a class="btn btn-ghost" href="#phases">How it Works</a>
     </div>
+    <button class="voice-pill" id="voicePill" aria-pressed="false"><svg class="ic vic"><use href="#i-voice"/></svg><span class="vp-t">Let the AI introduce itself</span></button>
     <div class="hero-stats">
       <div class="hstat"><span class="hnum">48hrs</span><span class="hlbl">Kickoff to live</span></div>
       <span class="hdiv"></span>
@@ -601,6 +617,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 <div class="mcta" id="mcta"><a class="btn btn-glow" href="/get-started.html">Get my free preview →</a></div>
 
 <div class="copy-toast" id="copyToast" role="status" aria-live="polite"></div>
+<button class="voice-fab" id="voiceFab" aria-pressed="false" aria-label="Unmute AI guide"><svg class="ic vic"><use href="#i-voice"/></svg></button>
 
 <script>
 (function(){
@@ -616,6 +633,140 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
     var done=function(){ show('Copied '+pretty+' — call it from your phone'); };
     if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(num).then(done,done); } else { done(); }
   });
+})();
+</script>
+
+<script>
+/* ── Nova Voice Guide — the site's own AI receptionist ──────────────────────
+   Opt-in (browsers require a user gesture for audio anyway). Hybrid engine:
+   plays /voice/<id>.mp3 through a Blade-Runner cavern reverb + echo chain
+   when the cinematic files exist (see VOICE-SETUP.md); otherwise falls back
+   to the browser's built-in voice — fittingly robotic for an AI receptionist.
+   Exposes window.__novaVoiceLevel() (0..1) so the supernova shader breathes
+   with every syllable. Narrates each section once as it scrolls into view. */
+(function(){
+  var LINES={
+    greeting:"You've reached Supernova. I'm the receptionist that never sleeps. Scroll — and I'll show you what I catch while you're gone.",
+    phases:"Five phases. One supernova. Every business is a star, waiting to ignite.",
+    built:"Built for the trades that build America. Tap any trade, and walk through a live demo.",
+    services:"A custom website, live in forty-eight hours. And me — answering every call you can't.",
+    work:"Real work, real clients. The day you sign on, we build yours.",
+    "demo-call":"Want proof? Call me, right now. I answer in one ring.",
+    pricing:"One flat fee for a site you own forever. I'm one ninety-nine a month — and I never take a day off.",
+    contact:"Ready to ignite? Tell me about your business — your free preview lands in forty-eight hours."
+  };
+  var level=0; window.__novaVoiceLevel=function(){ return level; };
+  var enabled=false, ctx=null, analyser=null, useFiles=false, buffers={}, spoken={}, curSrc=null, curUtter=null, fakeTimer=0, fft=null;
+
+  fetch('/voice/greeting.mp3',{method:'HEAD'}).then(function(r){ useFiles=!!r.ok; }).catch(function(){});
+
+  function makeIR(c,secs,decay){          // synthetic cavern impulse for the long eerie tail
+    var rate=c.sampleRate, len=Math.floor(rate*secs), ir=c.createBuffer(2,len,rate);
+    for(var ch=0;ch<2;ch++){ var d=ir.getChannelData(ch);
+      for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay); }
+    return ir;
+  }
+  function initCtx(){
+    if(ctx) return;
+    var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    ctx=new AC();
+    var master=ctx.createGain(); master.gain.value=.9;
+    analyser=ctx.createAnalyser(); analyser.fftSize=512;
+    var convolver=ctx.createConvolver(); convolver.buffer=makeIR(ctx,2.6,3.2);
+    var wet=ctx.createGain(); wet.gain.value=.55;
+    var dry=ctx.createGain(); dry.gain.value=.75;
+    var dl=ctx.createDelay(1); dl.delayTime.value=.27;          // slap echo
+    var fb=ctx.createGain(); fb.gain.value=.3; dl.connect(fb); fb.connect(dl);
+    convolver.connect(wet); wet.connect(master); dl.connect(master); dry.connect(master);
+    master.connect(analyser); analyser.connect(ctx.destination);
+    ctx.__in=function(node){ node.connect(dry); node.connect(convolver); node.connect(dl); };
+    if('speechSynthesis' in window) speechSynthesis.getVoices(); // warm the voice list
+  }
+  function pump(){                          // true level from the analyser (file playback)
+    if(!analyser || !curSrc){ if(!curUtter) level=0; return; }
+    fft=fft||new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(fft);
+    var s=0; for(var i=2;i<40;i++) s+=fft[i];
+    level=Math.min(1,s/(38*140));
+    requestAnimationFrame(pump);
+  }
+  function fakePump(){                      // speechSynthesis can't enter WebAudio — fake a speech envelope
+    if(!curUtter){ level=0; return; }
+    var t=performance.now()/1000;
+    level=.22+.42*Math.abs(Math.sin(t*7.3))*(.6+.4*Math.sin(t*2.1));
+    fakeTimer=requestAnimationFrame(fakePump);
+  }
+  function stop(){
+    if(curSrc){ try{curSrc.stop();}catch(e){} curSrc=null; }
+    if('speechSynthesis' in window) speechSynthesis.cancel();
+    if(fakeTimer){ cancelAnimationFrame(fakeTimer); fakeTimer=0; }
+    curUtter=null; level=0;
+  }
+  function pickVoice(){
+    var vs=speechSynthesis.getVoices(), best=null,
+        want=['aria','jenny','guy','google us english','samantha','daniel'];
+    for(var i=0;i<vs.length;i++){ var v=vs[i];
+      if((v.lang||'').indexOf('en')!==0) continue;
+      if(!best) best=v;
+      var n=v.name.toLowerCase();
+      for(var j=0;j<want.length;j++) if(n.indexOf(want[j])>-1) return v;
+    }
+    return best;
+  }
+  function speakSynth(id){
+    if(!('speechSynthesis' in window)) return;
+    var u=new SpeechSynthesisUtterance(LINES[id]);
+    var v=pickVoice(); if(v) u.voice=v;
+    u.rate=.92; u.pitch=.78;                // slow + low = closest the built-in voice gets to eerie
+    u.onend=u.onerror=function(){ if(curUtter===u){ curUtter=null; level=0; } };
+    curUtter=u; speechSynthesis.speak(u); fakePump();
+  }
+  function speak(id){
+    if(!enabled || !LINES[id] || spoken[id]) return;
+    spoken[id]=true; stop();
+    if(useFiles && ctx){
+      var go=function(buf){ var src=ctx.createBufferSource(); src.buffer=buf; ctx.__in(src);
+        curSrc=src; src.onended=function(){ if(curSrc===src){ curSrc=null; level=0; } };
+        src.start(); pump(); };
+      if(buffers[id]) return go(buffers[id]);
+      fetch('/voice/'+id+'.mp3').then(function(r){ if(!r.ok) throw 0; return r.arrayBuffer(); })
+        .then(function(ab){ return ctx.decodeAudioData(ab); })
+        .then(function(buf){ buffers[id]=buf; go(buf); })
+        .catch(function(){ speakSynth(id); });
+    } else speakSynth(id);
+  }
+
+  // ---- UI ----
+  var pill=document.getElementById('voicePill'), fab=document.getElementById('voiceFab');
+  function setUI(){
+    var pref=null; try{ pref=localStorage.getItem('nova-voice'); }catch(e){}
+    if(pill){ pill.setAttribute('aria-pressed',String(enabled)); pill.classList.toggle('on',enabled);
+      pill.querySelector('.vp-t').textContent=enabled?'AI guide on — tap to mute':'Let the AI introduce itself'; }
+    if(fab){ fab.classList.toggle('show',enabled||!!pref); fab.classList.toggle('on',enabled);
+      fab.setAttribute('aria-pressed',String(enabled));
+      fab.setAttribute('aria-label',enabled?'Mute AI guide':'Unmute AI guide'); }
+  }
+  function setEnabled(on,fromUser){
+    enabled=on;
+    try{ localStorage.setItem('nova-voice',on?'on':'off'); }catch(e){}
+    if(on){ initCtx(); if(ctx&&ctx.state==='suspended') ctx.resume(); if(fromUser) speak('greeting'); }
+    else stop();
+    setUI();
+  }
+  if(pill) pill.addEventListener('click',function(){ setEnabled(!enabled,true); });
+  if(fab) fab.addEventListener('click',function(){ setEnabled(!enabled,true); });
+
+  // Returning visitor who left it on: arm on their first tap (autoplay rules), skip the greeting replay
+  var pref=null; try{ pref=localStorage.getItem('nova-voice'); }catch(e){}
+  if(pref==='on') addEventListener('pointerdown',function(){ if(!enabled){ spoken.greeting=true; setEnabled(true,false); } },{once:true,passive:true});
+  setUI();
+
+  // ---- scroll narration: one line per section, first time it enters view ----
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting) speak(en.target.id); }); },{threshold:.25});
+    Object.keys(LINES).forEach(function(id){ if(id!=='greeting'){ var el=document.getElementById(id); if(el) io.observe(el); } });
+  }
+  document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); });
 })();
 </script>
 
@@ -747,7 +898,7 @@ if (!reduced && !saveData) try {
   const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 10); camera.position.z = 1;
 
   const uniforms = {
-    uProgress:{value:0}, uTime:{value:0},
+    uProgress:{value:0}, uTime:{value:0}, uVoice:{value:0},
     uRes:{value:new THREE.Vector2(innerWidth*DPR, innerHeight*DPR)},
     uPointer:{value:new THREE.Vector2(0,0)}
   };
@@ -756,7 +907,7 @@ if (!reduced && !saveData) try {
     vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
     fragmentShader:`
       precision highp float; varying vec2 vUv;
-      uniform float uProgress, uTime; uniform vec2 uRes, uPointer;
+      uniform float uProgress, uTime, uVoice; uniform vec2 uRes, uPointer;
       float hash(vec2 p){ p=fract(p*vec2(123.34,345.45)); p+=dot(p,p+34.345); return fract(p.x*p.y); }
       float vn(vec2 p){ vec2 i=floor(p),f=fract(p); float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.)); vec2 u=f*f*(3.-2.*f); return mix(mix(a,b,u.x),mix(c,d,u.x),u.y); }
       float fbm(vec2 p){ float s=0.,a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<4;i++){ s+=a*vn(p); p=m*p; a*=.5; } return s; }
@@ -807,6 +958,7 @@ if (!reduced && !saveData) try {
         float core =smoothstep(mix(0.5,0.04,blast),0.0,r);
         float dens = core*(0.5+1.05*ignite)*(1.0-blast*0.82) + shell*blast*1.7 + rings*(0.9+0.5*n);
         dens *= (0.30 + 1.25*n); dens *= (1.0 - rebirth*0.85); dens=max(dens,0.0);
+        dens *= 1.0 + uVoice*0.5;                  // the nebula breathes with the AI guide's voice
 
         // richer, more saturated spectrum: blue -> cyan -> magenta -> green -> gold -> white-hot
         vec3 blue=vec3(0.20,0.45,1.0), cyan=vec3(0.22,0.95,1.0), mag=vec3(1.0,0.25,0.85),
@@ -841,6 +993,8 @@ if (!reduced && !saveData) try {
     lastFrame = ts||0;
     uniforms.uTime.value += clock.getDelta();
     prog += (target-prog)*0.09; uniforms.uProgress.value=prog;
+    const vl = (reduced || !window.__novaVoiceLevel) ? 0 : window.__novaVoiceLevel();
+    uniforms.uVoice.value += (vl - uniforms.uVoice.value)*0.25;   // smoothed voice→light coupling
     mx+=(pmx-mx)*0.05; my+=(pmy-my)*0.05; uniforms.uPointer.value.set(mx,my);
     renderer.render(scene, camera);
     if(!checked){                                    // FPS watchdog — fall back to the poster only if the device truly can't cope

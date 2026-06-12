@@ -48,6 +48,14 @@ is safe to be public.
 2. Enter your email + a password you'll remember, and **tick "Auto Confirm User"**
    (so you can log in immediately without a confirmation email).
 3. This email + password is what you'll use to sign in at `/admin.html`.
+   ⚠️ It must be **correiadossantoswilliam44@gmail.com** — the database rules in
+   `schema.sql` only let that exact email read leads. (Different email? Edit the
+   email in `schema.sql` first, then run it.)
+4. **Lock out strangers:** go to **Authentication → Sign In / Up** and turn **off**
+   "Allow new users to sign up". Supabase leaves this on by default, and the anon
+   key in the site is public — without this, anyone could create an account.
+   (Even if you forget, the email-pinned rules in `schema.sql` still keep your
+   leads private — this step is belt *and* suspenders.)
 
 ## Step 4 — Copy your two keys (~1 min)
 

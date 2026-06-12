@@ -8,14 +8,16 @@
 <meta name="description" content="Supernova is an AI website builder for local trade businesses — plumbers, roofers, HVAC, electricians, landscapers and more. Get a custom website plus a 24/7 AI phone receptionist, live in 48 hours. One-time fee for the website you own; the AI receptionist is monthly, cancel anytime."/>
 <meta name="keywords" content="AI website builder, website builder for trades, plumber website, roofer website, HVAC website, electrician website, local business website, AI receptionist, 48 hour website, contractor website builder"/>
 <link rel="icon" type="image/svg+xml" href="/logo.svg"/>
+<link rel="canonical" href="https://correiadossantoswilliam44-hub.github.io/nova.html"/>
 <meta property="og:type" content="website"/>
+<meta property="og:url" content="https://correiadossantoswilliam44-hub.github.io/nova.html"/>
 <meta property="og:title" content="AI Website Builder for Local Trades | Live in 48 Hours — Supernova"/>
 <meta property="og:description" content="An AI website builder for plumbers, roofers, HVAC, electricians and other local trades. Custom site + 24/7 AI receptionist, live in 48 hours."/>
-<meta property="og:image" content="https://correiadossantoswilliam44-hub.github.io/nova-banner.png"/>
+<meta property="og:image" content="https://correiadossantoswilliam44-hub.github.io/nova-banner.jpg"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="AI Website Builder for Local Trades | Live in 48 Hours — Supernova"/>
 <meta name="twitter:description" content="An AI website builder for plumbers, roofers, HVAC, electricians and other local trades. Custom site + 24/7 AI receptionist, live in 48 hours."/>
-<meta name="twitter:image" content="https://correiadossantoswilliam44-hub.github.io/nova-banner.png"/>
+<meta name="twitter:image" content="https://correiadossantoswilliam44-hub.github.io/nova-banner.jpg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
@@ -500,7 +502,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
       <div class="testi">
         <div class="testi-stars" aria-label="5 out of 5 stars"><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg><svg><use href="#i-star-fill"/></svg></div>
         <p class="testi-quote">The AI receptionist booked 5 new jobs for me in the first week. I was losing those calls to voicemail before — now nothing slips through.</p>
-        <div class="testi-who"><img class="testi-face" src="/client-904blendz.jpg" alt="904 Blendz barber" loading="lazy" style="object-position:56% 20%"/><div class="testi-id"><span class="testi-name">Jalen Gardner</span><span class="testi-co">904 Blendz · Barbershop</span></div></div>
+        <div class="testi-who"><img class="testi-face" src="/work-904blendz.jpg" alt="904 Blendz barber" loading="lazy" width="52" height="52" style="object-position:56% 20%"/><div class="testi-id"><span class="testi-name">Jalen Gardner</span><span class="testi-co">904 Blendz · Barbershop</span></div></div>
       </div>
     </div>
   </div>
@@ -524,8 +526,6 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
         <a class="btn btn-ghost" href="#contact">Get this for my business</a>
       </div>
       <span class="demo-note">Go ahead — ask about hours, pricing, or try to book an appointment.</span>
-      <span class="demo-or">or hear a real call</span>
-      <span class="demo-soon-badge">Recorded demo · Coming soon</span>
     </div>
   </div>
 </section>
@@ -765,30 +765,47 @@ if (!reduced && !saveData) try {
         float ignite=smoothstep(0.08,0.34,p);
         float charge=smoothstep(0.34,0.47,p);
         float blast =smoothstep(0.47,0.88,p);
-        float flash =smoothstep(0.46,0.49,p)*(1.0-smoothstep(0.49,0.66,p));
         float rebirth=smoothstep(0.86,1.0,p);
 
-        // vibration: realistic camera rumble, multi-frequency, trauma-curved, with a shock punch
-        float rumble = flash*1.9 + blast*(1.0-blast)*1.5;
+        // Detonation: NO full-screen flash (photosensitive-safe). The energy reads as
+        // sonic shockwave rings racing outward + a multi-frequency camera rumble.
+        float boom  =smoothstep(0.46,0.52,p)*(1.0-smoothstep(0.52,0.74,p));   // detonation envelope
+        float bt    =smoothstep(0.46,0.74,p);                                  // shockwave timeline 0->1
+
+        // vibration: realistic camera rumble, multi-frequency, trauma-curved — peaks as the rings pass
+        float rumble = boom*1.1 + blast*(1.0-blast)*0.9;
         float tr = rumble*rumble;
         vec2 shake = vec2(
-          sin(uTime*96.0)+0.5*sin(uTime*47.0),
-          cos(uTime*88.0)+0.5*cos(uTime*59.0)
-        ) * 0.004 * tr;
+          sin(uTime*96.0)+0.6*sin(uTime*47.0)+0.3*sin(uTime*23.0),
+          cos(uTime*88.0)+0.6*cos(uTime*59.0)+0.3*cos(uTime*31.0)
+        ) * 0.0035 * tr;
 
         vec2 uv=(gl_FragCoord.xy-0.5*uRes)/uRes.y;
         uv += uPointer*0.03 + shake;
-        uv *= 1.0 - flash*0.10;                    // shockwave compression punch at detonation
+        uv *= 1.0 - boom*0.04;                     // subtle compression punch (no strobe)
         float r=length(uv), ang=atan(uv.y,uv.x);
+
+        // Sonic shockwave: three concentric rings expand at offset speeds, each fading
+        // as it travels — light stays localized to the wavefronts, never floods the screen
+        float w1=bt, w2=clamp(bt*1.3-0.12,0.0,1.0), w3=clamp(bt*1.7-0.28,0.0,1.0);
+        float rg1=abs(r-mix(0.05,1.55,w1*w1*(3.0-2.0*w1)));
+        float rg2=abs(r-mix(0.05,1.55,w2*w2*(3.0-2.0*w2)));
+        float rg3=abs(r-mix(0.05,1.55,w3*w3*(3.0-2.0*w3)));
+        float live=smoothstep(0.0,0.05,bt)*(1.0-smoothstep(0.82,1.0,bt));
+        float rings=( exp(-rg1*rg1*650.0)*1.5*(1.0-w1*0.55)
+                    + exp(-rg2*rg2*1500.0)*1.0*(1.0-w2*0.7)
+                    + exp(-rg3*rg3*2700.0)*0.7*(1.0-w3*0.8) )*live;
+
         float t=uTime*0.05; vec2 q=uv*2.6;
+        q += (uv/max(r,1e-3)) * exp(-rg1*rg1*420.0) * 0.20 * live;   // wavefront refraction — the leading ring bends the nebula as it passes
         vec2 w=vec2(fbm(q+vec2(0.0,t)+1.7), fbm(q+vec2(3.7,-t)+8.3));
         float n=fbm(q*1.35 + w*2.2 + vec2(cos(ang),sin(ang))*0.55); n=pow(max(n,0.0),1.35);
         float n2=fbm(q*0.8 + w*1.2 - vec2(t,t));          // second field for color variety
 
         float shellR=mix(0.05,1.5,blast)*(1.0-charge*0.4);
-        float shell=smoothstep(0.60,0.0,abs(r-shellR));
+        float shell=smoothstep(0.38,0.0,abs(r-shellR));
         float core =smoothstep(mix(0.5,0.04,blast),0.0,r);
-        float dens = core*(0.5+1.05*ignite)*(1.0-blast*0.82) + shell*blast*2.1 + flash*smoothstep(0.9,0.0,r)*2.0;
+        float dens = core*(0.5+1.05*ignite)*(1.0-blast*0.82) + shell*blast*1.7 + rings*(0.9+0.5*n);
         dens *= (0.30 + 1.25*n); dens *= (1.0 - rebirth*0.85); dens=max(dens,0.0);
 
         // richer, more saturated spectrum: blue -> cyan -> magenta -> green -> gold -> white-hot
@@ -798,7 +815,7 @@ if (!reduced && !saveData) try {
         col = mix(col, mag,   smoothstep(0.45,0.85,n));
         col = mix(col, green, smoothstep(0.30,0.55,n2)*0.35);
         col = mix(col, gold,  smoothstep(0.55,1.15,dens));
-        col = mix(col, vec3(1.0,0.98,0.92), clamp(smoothstep(1.1,2.0,dens)+flash,0.0,1.0));
+        col = mix(col, vec3(1.0,0.98,0.92), clamp(smoothstep(1.15,2.1,dens),0.0,1.0));
 
         col = mix(col, col*col*1.4 + col*0.3, 0.35);      // richer saturation
         gl_FragColor=vec4(col*dens*2.1, 1.0);             // brighter glow; dark=black=transparent via CSS screen blend

@@ -63,9 +63,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 
 <div class="wrap">
   <div class="stats">
-    <div class="stat"><div class="num green" id="statCaptured">14</div><div class="lbl">Calls caught</div></div>
-    <div class="stat"><div class="num brand" id="statBooked">9</div><div class="lbl">Want to book</div></div>
-    <div class="stat"><div class="num gold" id="statSaved">$3,150</div><div class="lbl">Revenue saved</div></div>
+    <div class="stat"><div class="num green" id="statCaptured">6</div><div class="lbl">Calls caught</div></div>
+    <div class="stat"><div class="num brand" id="statBooked">5</div><div class="lbl">Want to book</div></div>
+    <div class="stat"><div class="num gold" id="statSaved">$3,350</div><div class="lbl">Revenue saved</div></div>
   </div>
 
   <div class="section-title">Recent captured calls</div>
@@ -84,12 +84,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 <script>
 // Sample captured calls, this is the visual you show owners on your phone
 const sampleCalls = [
-  { name: 'Mike R.', need: 'Car won\'t start, needs a tow + diagnostic today', time: '2:14 PM', booked: true, value: 350 },
-  { name: 'Sarah T.', need: 'Wants an oil change appointment this week', time: '1:47 PM', booked: true, value: 80 },
-  { name: 'James P.', need: 'Brake noise, asking if you can look at it tomorrow', time: '12:33 PM', booked: true, value: 400 },
-  { name: 'Linda M.', need: 'Asked about state inspection pricing & hours', time: '11:20 AM', booked: false, value: 120 },
-  { name: 'Carlos D.', need: 'Check engine light, wants to come in', time: '10:05 AM', booked: true, value: 250 },
-  { name: 'Amanda K.', need: 'Fleet maintenance quote for 3 vans', time: '9:41 AM', booked: true, value: 900 },
+  { name: 'Mike R.', need: 'Water heater leaking, needs someone out today', time: '2:14 PM', booked: true, value: 450 },
+  { name: 'Sarah T.', need: 'Wants a quote for an electrical panel upgrade', time: '1:47 PM', booked: true, value: 1200 },
+  { name: 'James P.', need: 'AC blowing warm air, asking about same-day service', time: '12:33 PM', booked: true, value: 300 },
+  { name: 'Linda M.', need: 'Asked about pricing and whether you\'re licensed & insured', time: '11:20 AM', booked: false, value: 150 },
+  { name: 'Carlos D.', need: 'Clogged main drain, wants the first slot tomorrow', time: '10:05 AM', booked: true, value: 350 },
+  { name: 'Amanda K.', need: 'Roof leak after the storm — wants an inspection', time: '9:41 AM', booked: true, value: 900 },
 ];
 
 function render() {

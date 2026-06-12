@@ -41,7 +41,10 @@ img{max-width:100%}
 .ribbon .rib-left{display:flex;align-items:center;gap:9px}
 .spark{width:7px;height:7px;border-radius:50%;background:#ffd76b;box-shadow:0 0 9px #ffd76b;flex-shrink:0}
 .switch{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#9aa6c8}
-.switch select{font-family:inherit;font-size:12.5px;font-weight:600;color:#eef2ff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 9px;cursor:pointer}
+.switch select{font-family:inherit;font-size:12.5px;font-weight:600;color:#eef2ff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 9px;cursor:pointer;transition:border-color .2s,background .2s}
+.switch select:hover,.switch select:focus-visible{border-color:rgba(255,215,107,.55);background:rgba(255,255,255,.14);outline:0}
+/* The popup list renders on the OS's light background — give options dark text or they're invisible */
+.switch select option{color:#10182b;background:#fff}
 
 /* header */
 header{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
@@ -136,7 +139,15 @@ footer{padding:40px 0;border-top:1px solid var(--line);color:var(--body);font-si
 .copy-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);z-index:60;background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:0 14px 34px -10px rgba(16,24,43,.6);opacity:0;pointer-events:none;transition:opacity .3s var(--e),transform .3s var(--e)}
 .copy-toast.show{opacity:1;transform:translate(-50%,0)}
 
-@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* ── Alive: trade-morph crossfade + scroll reveals (all JS-added, so no-JS stays visible) ── */
+.morph{transition:opacity .3s var(--e),transform .3s var(--e)}
+body.swapping .morph{opacity:0;transform:translateY(12px)}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s var(--e),transform .6s var(--e);transition-delay:var(--d,0ms)}
+.rv.in{opacity:1;transform:none}
+.hc-ico{animation:bob 4.5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}.rv{opacity:1!important;transform:none!important}body.swapping .morph{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -370,10 +381,35 @@ function render(key){
 }
 const cur=param();
 render(cur);
-// build switcher
+
+// build switcher — switches the trade IN PLACE with a crossfade (no page reload)
 const sel=document.getElementById('tradeSwitch');
 Object.keys(TRADES).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=TRADES[k].label;if(k===cur)o.selected=true;sel.appendChild(o);});
-sel.addEventListener('change',()=>{location.href='demo-site.html?trade='+sel.value;});
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+document.querySelectorAll('header,section,.trust,footer').forEach(el=>el.classList.add('morph'));
+sel.addEventListener('change',()=>{
+  const k=sel.value;
+  const swap=()=>{ render(k); history.replaceState(null,'','demo-site.html?trade='+k); wireReveals(true); };
+  if(reduced){ swap(); return; }
+  document.body.classList.add('swapping');
+  setTimeout(()=>{ swap(); requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('swapping'))); },320);
+});
+
+// Scroll reveals — staggered, IntersectionObserver-driven, reduced-motion safe
+function wireReveals(instant){
+  if(reduced || !('IntersectionObserver' in window)) return;
+  const els=[...document.querySelectorAll('.svc,.rev,.why-list li,.head,.cta-band')];
+  els.forEach(el=>{ if(!el.classList.contains('rv')) el.classList.add('rv'); });
+  // stagger siblings within the same parent
+  const seen=new Map();
+  els.forEach(el=>{ const p=el.parentElement; const i=seen.get(p)||0; el.style.setProperty('--d',(i*70)+'ms'); seen.set(p,i+1); });
+  const io=new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); },{threshold:.12});
+  els.forEach(el=>{
+    if(instant && el.getBoundingClientRect().top < innerHeight){ el.classList.add('in'); }  // re-rendered content already in view: show now
+    else io.observe(el);
+  });
+}
+wireReveals(false);
 </script>
 </body>
 </html>

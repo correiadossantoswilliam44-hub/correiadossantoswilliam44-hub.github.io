@@ -235,120 +235,176 @@
   document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); });
 
   // ============================ HOLOGRAM HEAD =============================
+  // If /holo-face.(png|jpg|webp) exists, render it as an animated hologram —
+  // chromatic flicker, scanlines, materialize dissolve, audio-reactive glow —
+  // on a plane, with a parallax bokeh/particle layer + HUD ring for real depth.
+  // Until that image is dropped in, fall back to the procedural point-cloud head.
   function bootHolo(){
     if(holoBooted) return; holoBooted=true;
     var reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
     var save = !!(navigator.connection && navigator.connection.saveData);
     if(reduced || save) return;
+    var IMGS=[]; var custom=SCRIPT&&SCRIPT.dataset&&SCRIPT.dataset.holoImg;
+    if(custom) IMGS.push(custom);
+    IMGS.push('/holo-face.png','/holo-face.jpg','/holo-face.webp');
     (async function(){
       try{
         var THREE = await import('three');
-        var GL = await import('three/addons/loaders/GLTFLoader.js');
         var phone = innerWidth < 700;
         var SIZE = phone ? Math.min(150, innerWidth*0.42) : Math.min(340, innerWidth*0.32);
         var DPR = Math.min(devicePixelRatio, phone ? 1.5 : 2);
         var renderer = new THREE.WebGLRenderer({ canvas:holoCanvas, alpha:true, antialias:true });
-        renderer.setPixelRatio(DPR);
-        renderer.setSize(SIZE,SIZE);
-        var scene=new THREE.Scene();
-        var cam=new THREE.PerspectiveCamera(32,1,.1,50); cam.position.set(0,.1,9);
-        var PIX=SIZE*DPR;
-        var uni={ uTime:{value:0}, uLevel:{value:0}, uOn:{value:0}, uPix:{value:PIX} };
+        renderer.setPixelRatio(DPR); renderer.setSize(SIZE,SIZE);
+        if('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
+        var scene = new THREE.Scene();
+        var cam = new THREE.PerspectiveCamera(32,1,.1,50); cam.position.set(0,.1,9);
+        var uni = { uTime:{value:0}, uLevel:{value:0}, uOn:{value:0}, uPix:{value:SIZE*DPR} };
 
-        var headMat=new THREE.ShaderMaterial({
-          uniforms:uni, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
-          vertexShader:
-            'uniform float uTime,uOn,uLevel,uPix;'+
-            'attribute vec3 aNormal; attribute float aSeed;'+
-            'varying float vFres,vSeed,vGone; varying vec3 vW;'+
-            'float h(float n){return fract(sin(n)*43758.5453);}'+
-            'void main(){'+
-            ' vSeed=aSeed; vec3 p=position;'+
-            ' float band=floor((p.y+2.0)*7.0);'+
-            ' float g=step(.97,h(band+floor(uTime*8.0)));'+
-            ' p.x+=g*(h(band*1.7+floor(uTime*8.0))-.5)*.35;'+
-            ' p+=aNormal*(h(aSeed*97.0+floor(uTime*26.0))-.5)*.06*uLevel;'+
-            ' vec3 vn=normalize(normalMatrix*aNormal);'+
-            ' vFres=pow(1.0-abs(vn.z),1.5);'+
-            ' vec4 w=modelMatrix*vec4(p,1.0); vW=w.xyz; vec4 mv=viewMatrix*w;'+
-            ' float node=step(.975,aSeed);'+
-            ' float twk=.8+.35*sin(uTime*3.0+aSeed*42.0);'+
-            ' float appear=smoothstep(uOn*1.12,uOn*1.12-.18,aSeed); vGone=1.0-appear;'+
-            ' float size=(.8+1.1*vFres+node*3.2)*twk*(1.0+uLevel*.9)*appear;'+
-            ' gl_PointSize=max(size*uPix*.016/max(-mv.z,.1),0.0);'+
-            ' gl_Position=projectionMatrix*mv;'+
-            '}',
-          fragmentShader:
-            'precision highp float; uniform float uTime,uLevel,uOn;'+
-            'varying float vFres,vSeed,vGone; varying vec3 vW;'+
-            'void main(){'+
-            ' if(vGone>.995) discard;'+
-            ' float d=length(gl_PointCoord-.5);'+
-            ' float disc=smoothstep(.5,.0,d);'+
-            ' float node=step(.975,vSeed);'+
-            ' float scan=.65+.35*sin(vW.y*9.0-uTime*4.0);'+
-            ' float flick=.9+.1*sin(uTime*41.0)*sin(uTime*27.3);'+
-            ' vec3 cyan=vec3(.30,.80,1.0),deep=vec3(.10,.45,1.0);'+
-            ' vec3 col=mix(deep,cyan,vFres);'+
-            ' col=mix(col,vec3(.85,.97,1.0),node*.9);'+
-            ' float a=disc*(.55+.9*vFres+node*1.3)*scan*flick*uOn;'+
-            ' gl_FragColor=vec4(col*(1.3+uLevel*.9+node*1.5),a);'+
-            '}'
-        });
+        var tx=0,ty=0,px=0,py=0;
+        addEventListener('pointermove',function(e){ tx=e.clientX/innerWidth-.5; ty=e.clientY/innerHeight-.5; },{passive:true});
+        if(window.DeviceOrientationEvent) addEventListener('deviceorientation',function(e){
+          if(e.gamma!=null){ tx=Math.max(-.6,Math.min(.6,e.gamma/45)); ty=Math.max(-.6,Math.min(.6,(e.beta-40)/45)); }
+        },{passive:true});
 
-        var ringMat=new THREE.ShaderMaterial({
-          uniforms:uni, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
-          vertexShader:
-            'uniform float uTime,uOn,uLevel,uPix; attribute float aSeed; varying float vSeed;'+
-            'void main(){ vSeed=aSeed; vec4 mv=modelViewMatrix*vec4(position,1.0);'+
-            ' float appear=smoothstep(uOn*1.1,uOn*1.1-.2,aSeed);'+
-            ' gl_PointSize=max((1.0+2.0*aSeed)*(1.0+uLevel*.6)*appear*uPix*.012/max(-mv.z,.1),0.0);'+
-            ' gl_Position=projectionMatrix*mv; }',
-          fragmentShader:
-            'precision highp float; uniform float uOn,uLevel; varying float vSeed;'+
-            'void main(){ float d=length(gl_PointCoord-.5); float disc=smoothstep(.5,.0,d);'+
-            ' gl_FragColor=vec4(vec3(.4,.85,1.0)*(1.4+uLevel),disc*uOn*(.4+.6*vSeed)); }'
-        });
-
-        var gltf=await new GL.GLTFLoader().loadAsync('/holo-head.glb');
-        var src=null; gltf.scene.traverse(function(o){ if(o.isMesh&&!src) src=o; });
-        var pos=src.geometry.attributes.position, nrm=src.geometry.attributes.normal;
-        var CAP=phone?12000:26000, total=pos.count, stride=total>CAP?Math.ceil(total/CAP):1;
-        var P=[],N=[],S=[];
-        for(var i=0;i<total;i+=stride){
-          P.push(pos.getX(i),pos.getY(i),pos.getZ(i));
-          if(nrm) N.push(nrm.getX(i),nrm.getY(i),nrm.getZ(i)); else N.push(0,0,1);
-          S.push(Math.random());
+        function ringPoints(){
+          var RN=phone?160:240, RP=[],RS=[];
+          for(var k=0;k<RN;k++){ if(k%7===0) continue; var a=k/RN*Math.PI*2, r=3.15+(k%2)*.12;
+            RP.push(Math.cos(a)*r, Math.sin(a)*r*.62, 0); RS.push(Math.random()); }
+          var g=new THREE.BufferGeometry();
+          g.setAttribute('position',new THREE.Float32BufferAttribute(RP,3));
+          g.setAttribute('aSeed',new THREE.Float32BufferAttribute(RS,1));
+          return new THREE.Points(g, new THREE.ShaderMaterial({
+            uniforms:uni, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+            vertexShader:`uniform float uOn,uLevel,uPix; attribute float aSeed; varying float vS;
+              void main(){ vS=aSeed; vec4 mv=modelViewMatrix*vec4(position,1.0);
+              float ap=smoothstep(uOn*1.1,uOn*1.1-.2,aSeed);
+              gl_PointSize=max((1.0+2.0*aSeed)*(1.0+uLevel*.6)*ap*uPix*.012/max(-mv.z,.1),0.0);
+              gl_Position=projectionMatrix*mv; }`,
+            fragmentShader:`precision highp float; uniform float uOn,uLevel; varying float vS;
+              void main(){ float d=length(gl_PointCoord-.5); float disc=smoothstep(.5,.0,d);
+              gl_FragColor=vec4(vec3(.4,.85,1.0)*(1.4+uLevel),disc*uOn*(.4+.6*vS)); }`
+          }));
         }
-        var hg=new THREE.BufferGeometry();
-        hg.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
-        hg.setAttribute('aNormal',new THREE.Float32BufferAttribute(N,3));
-        hg.setAttribute('aSeed',new THREE.Float32BufferAttribute(S,1));
-        hg.center(); hg.computeBoundingBox();
-        var sz=new THREE.Vector3(); hg.boundingBox.getSize(sz);
-        var head=new THREE.Points(hg,headMat); head.scale.setScalar(4.7/sz.y); scene.add(head);
 
-        var RN=240,RP=[],RS=[];
-        for(var k=0;k<RN;k++){ if(k%7===0) continue;
-          var a=k/RN*Math.PI*2, r=3.15+(k%2)*0.12;
-          RP.push(Math.cos(a)*r,Math.sin(a)*r*0.62,0); RS.push(Math.random()); }
-        var rgo=new THREE.BufferGeometry();
-        rgo.setAttribute('position',new THREE.Float32BufferAttribute(RP,3));
-        rgo.setAttribute('aSeed',new THREE.Float32BufferAttribute(RS,1));
-        var ring=new THREE.Points(rgo,ringMat); ring.position.set(.4,-.1,-1.1); ring.rotation.x=.9; scene.add(ring);
+        function buildImage(tex){
+          tex.colorSpace=THREE.SRGBColorSpace;
+          var iw=(tex.image&&tex.image.width)||16, ih=(tex.image&&tex.image.height)||9, aspect=iw/ih;
+          var group=new THREE.Group(); scene.add(group);
+          var plane=new THREE.Mesh(new THREE.PlaneGeometry(aspect,1), new THREE.ShaderMaterial({
+            uniforms:Object.assign({uTex:{value:tex}}, uni), transparent:true, depthWrite:false,
+            vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+            fragmentShader:`precision highp float; uniform sampler2D uTex; uniform float uTime,uOn,uLevel; varying vec2 vUv;
+              float hsh(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
+              void main(){
+                vec2 uv=vUv; float ca=.003*(1.0+uLevel*2.5);
+                vec3 c; c.r=texture2D(uTex,uv+vec2(ca,0.)).r; c.g=texture2D(uTex,uv).g; c.b=texture2D(uTex,uv-vec2(ca,0.)).b;
+                float lum=dot(c,vec3(.299,.587,.114));
+                vec3 col=mix(c, vec3(.32,.85,1.25)*lum*1.4, .35);
+                col+=vec3(.1,.42,.72)*lum*uLevel;
+                float scan=.86+.14*sin(uv.y*700.0);
+                float band=.92+.08*sin(uv.y*10.0-uTime*3.0);
+                float flick=.93+.07*sin(uTime*40.0)*sin(uTime*27.0);
+                col*=scan*band*flick;
+                float a=smoothstep(.06,.30,lum);
+                a*=smoothstep(uOn*1.12,uOn*1.12-.22,hsh(floor(uv*150.0)));
+                a*=uOn; if(a<.004) discard;
+                gl_FragColor=vec4(col*(1.05+uLevel*.6), a);
+              }`
+          }));
+          var visH=2.0*Math.tan(cam.fov*Math.PI/360)*cam.position.z;
+          var s=Math.min(visH/aspect, visH)*0.98; plane.scale.set(s,s,1); group.add(plane);
+          var ring=ringPoints(); ring.position.set(.15,0,-.4); group.add(ring);
+          var PN=phone?40:90, PP=[],PS=[];
+          for(var i=0;i<PN;i++){ PP.push((Math.random()-.5)*5.0,(Math.random()-.5)*5.0,(Math.random()-.5)*2.2-.6); PS.push(Math.random()); }
+          var pg=new THREE.BufferGeometry();
+          pg.setAttribute('position',new THREE.Float32BufferAttribute(PP,3));
+          pg.setAttribute('aSeed',new THREE.Float32BufferAttribute(PS,1));
+          var parts=new THREE.Points(pg, new THREE.ShaderMaterial({
+            uniforms:uni, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+            vertexShader:`uniform float uTime,uOn,uLevel,uPix; attribute float aSeed; varying float vS;
+              void main(){ vS=aSeed; vec3 p=position; p.y=mod(p.y+uTime*(.2+aSeed*.3)+2.5,5.0)-2.5;
+              vec4 mv=modelViewMatrix*vec4(p,1.0);
+              gl_PointSize=max((1.0+3.0*aSeed)*(1.0+uLevel)*uOn*uPix*.01/max(-mv.z,.1),0.0);
+              gl_Position=projectionMatrix*mv; }`,
+            fragmentShader:`precision highp float; uniform float uOn,uTime; varying float vS;
+              void main(){ float d=length(gl_PointCoord-.5); float disc=smoothstep(.5,.0,d);
+              float tw=.6+.4*sin(uTime*3.0+vS*40.0);
+              vec3 col=mix(vec3(.3,.8,1.0),vec3(1.0,.6,.3),step(.82,vS));
+              gl_FragColor=vec4(col,disc*uOn*tw*(.25+.5*vS)); }`
+          }));
+          group.add(parts);
+          scene.userData.update=function(t,_px,_py){
+            group.rotation.y=_px*.45; group.rotation.x=-_py*.28;
+            group.position.x=_px*.5; group.position.y=Math.sin(t*.6)*.06-_py*.3;
+            ring.rotation.z=t*.25;
+          };
+        }
+
+        async function buildPoints(){
+          var GL=await import('three/addons/loaders/GLTFLoader.js');
+          var headMat=new THREE.ShaderMaterial({
+            uniforms:uni, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+            vertexShader:`uniform float uTime,uOn,uLevel,uPix; attribute vec3 aNormal; attribute float aSeed;
+              varying float vFres,vSeed,vGone; varying vec3 vW;
+              float h(float n){return fract(sin(n)*43758.5453);}
+              void main(){ vSeed=aSeed; vec3 p=position;
+                float band=floor((p.y+2.0)*7.0); float g=step(.97,h(band+floor(uTime*8.0)));
+                p.x+=g*(h(band*1.7+floor(uTime*8.0))-.5)*.35;
+                p+=aNormal*(h(aSeed*97.0+floor(uTime*26.0))-.5)*.06*uLevel;
+                vec3 vn=normalize(normalMatrix*aNormal); vFres=pow(1.0-abs(vn.z),1.5);
+                vec4 w=modelMatrix*vec4(p,1.0); vW=w.xyz; vec4 mv=viewMatrix*w;
+                float node=step(.975,aSeed); float twk=.8+.35*sin(uTime*3.0+aSeed*42.0);
+                float appear=smoothstep(uOn*1.12,uOn*1.12-.18,aSeed); vGone=1.0-appear;
+                float size=(.8+1.1*vFres+node*3.2)*twk*(1.0+uLevel*.9)*appear;
+                gl_PointSize=max(size*uPix*.016/max(-mv.z,.1),0.0); gl_Position=projectionMatrix*mv; }`,
+            fragmentShader:`precision highp float; uniform float uTime,uLevel,uOn;
+              varying float vFres,vSeed,vGone; varying vec3 vW;
+              void main(){ if(vGone>.995) discard;
+                float d=length(gl_PointCoord-.5); float disc=smoothstep(.5,.0,d);
+                float node=step(.975,vSeed);
+                float scan=.65+.35*sin(vW.y*9.0-uTime*4.0);
+                float flick=.9+.1*sin(uTime*41.0)*sin(uTime*27.3);
+                vec3 cyan=vec3(.30,.80,1.0),deep=vec3(.10,.45,1.0);
+                vec3 col=mix(deep,cyan,vFres); col=mix(col,vec3(.85,.97,1.0),node*.9);
+                float a=disc*(.55+.9*vFres+node*1.3)*scan*flick*uOn;
+                gl_FragColor=vec4(col*(1.3+uLevel*.9+node*1.5),a); }`
+          });
+          var gltf=await new GL.GLTFLoader().loadAsync('/holo-head.glb');
+          var src=null; gltf.scene.traverse(function(o){ if(o.isMesh&&!src) src=o; });
+          var pos=src.geometry.attributes.position, nrm=src.geometry.attributes.normal;
+          var CAP=phone?12000:26000, total=pos.count, stride=total>CAP?Math.ceil(total/CAP):1;
+          var P=[],N=[],S=[];
+          for(var i=0;i<total;i+=stride){ P.push(pos.getX(i),pos.getY(i),pos.getZ(i));
+            if(nrm) N.push(nrm.getX(i),nrm.getY(i),nrm.getZ(i)); else N.push(0,0,1); S.push(Math.random()); }
+          var hg=new THREE.BufferGeometry();
+          hg.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
+          hg.setAttribute('aNormal',new THREE.Float32BufferAttribute(N,3));
+          hg.setAttribute('aSeed',new THREE.Float32BufferAttribute(S,1));
+          hg.center(); hg.computeBoundingBox();
+          var sz=new THREE.Vector3(); hg.boundingBox.getSize(sz);
+          var head=new THREE.Points(hg,headMat); head.scale.setScalar(4.7/sz.y); scene.add(head);
+          var ring=ringPoints(); ring.position.set(.4,-.1,-1.1); ring.rotation.x=.9; scene.add(ring);
+          scene.userData.update=function(t,_px,_py){
+            head.rotation.y=Math.sin(t*.4)*.32+_px*.3;
+            head.rotation.x=Math.sin(t*.23)*.07+uni.uLevel.value*.05-_py*.2;
+            ring.rotation.z=t*.25; };
+        }
+
+        var tex=null;
+        for(var ii=0; ii<IMGS.length && !tex; ii++){ try{ tex=await new THREE.TextureLoader().loadAsync(IMGS[ii]); }catch(e){} }
+        if(tex) buildImage(tex); else await buildPoints();
 
         var clock=new THREE.Clock(), on=0;
         (function loop(){
           requestAnimationFrame(loop);
           var t=clock.getElapsedTime();
-          var speaking=window.__novaVoiceSpeaking&&window.__novaVoiceSpeaking();
-          var lvl=window.__novaVoiceLevel?window.__novaVoiceLevel():0;
+          var speaking=window.__novaVoiceSpeaking && window.__novaVoiceSpeaking();
+          var lvl=window.__novaVoiceLevel ? window.__novaVoiceLevel() : 0;
           on += ((speaking?1:0)-on)*(speaking?.06:.022);
           uni.uOn.value=on; uni.uTime.value=t; uni.uLevel.value += (lvl-uni.uLevel.value)*.3;
-          head.rotation.y=Math.sin(t*.4)*.32;
-          head.rotation.x=Math.sin(t*.23)*.07+uni.uLevel.value*.05;
-          ring.rotation.z=t*.25;
-          holoWrap.classList.toggle('live',on>.02);
+          px+=(tx-px)*.06; py+=(ty-py)*.06;
+          if(scene.userData.update) scene.userData.update(t,px,py);
+          holoWrap.classList.toggle('live', on>.02);
           if(on>.01 && !document.hidden) renderer.render(scene,cam);
         })();
       }catch(e){ console.warn('Hologram unavailable:',e); }

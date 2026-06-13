@@ -246,7 +246,7 @@
     if(reduced || save) return;
     var IMGS=[]; var custom=SCRIPT&&SCRIPT.dataset&&SCRIPT.dataset.holoImg;
     if(custom) IMGS.push(custom);
-    IMGS.push('/holo-face.png','/holo-face.jpg','/holo-face.webp');
+    IMGS.push('/holo-face.webp','/holo-face.png','/holo-face.jpg');
     (async function(){
       try{
         var THREE = await import('three');

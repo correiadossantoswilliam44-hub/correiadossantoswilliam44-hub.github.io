@@ -298,6 +298,15 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 @media(max-width:600px){.voice-fab{bottom:84px}}
 @media(prefers-reduced-motion:reduce){.voice-pill{animation:none}}
 
+/* ── Holographic AI head — materializes bottom-right while the guide speaks ── */
+#holoWrap{position:fixed;right:22px;bottom:86px;z-index:44;width:min(320px,30vw);aspect-ratio:1;pointer-events:none;opacity:0;transition:opacity .7s var(--e-out)}
+#holoWrap.live{opacity:1}
+#holoWrap::after{content:"";position:absolute;left:50%;bottom:-40px;width:64%;height:72px;transform:translateX(-50%);background:radial-gradient(50% 100% at 50% 0%,rgba(80,200,255,.3),transparent 72%);filter:blur(2px);animation:beamflick 2.7s ease-in-out infinite}
+@keyframes beamflick{0%,100%{opacity:.75}43%{opacity:1}61%{opacity:.55}}
+#holo{width:100%;height:100%;display:block}
+@media(max-width:700px){#holoWrap{display:none}}
+@media(prefers-reduced-motion:reduce){#holoWrap{display:none}}
+
 /* Mobile performance — backdrop-blur and reveal-blur are the jank sources; drop them on small screens */
 @media(max-width:760px){
   header,.pill,.card,.trade,.price-card,.testi,.demo-card,.phase-node,.work-card{backdrop-filter:none}
@@ -618,6 +627,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 
 <div class="copy-toast" id="copyToast" role="status" aria-live="polite"></div>
 <button class="voice-fab" id="voiceFab" aria-pressed="false" aria-label="Unmute AI guide"><svg class="ic vic"><use href="#i-voice"/></svg></button>
+<div id="holoWrap" aria-hidden="true"><canvas id="holo"></canvas></div>
 
 <script>
 (function(){
@@ -657,6 +667,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   };
   var level=0; window.__novaVoiceLevel=function(){ return level; };
   var enabled=false, ctx=null, analyser=null, useFiles=false, buffers={}, spoken={}, curSrc=null, curUtter=null, fakeTimer=0, fft=null;
+  window.__novaVoiceSpeaking=function(){ return !!(curSrc||curUtter); };
 
   fetch('/voice/greeting.mp3',{method:'HEAD'}).then(function(r){ useFiles=!!r.ok; }).catch(function(){});
 
@@ -717,7 +728,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
     if(!('speechSynthesis' in window)) return;
     var u=new SpeechSynthesisUtterance(LINES[id]);
     var v=pickVoice(); if(v) u.voice=v;
-    u.rate=.92; u.pitch=.78;                // slow + low = closest the built-in voice gets to eerie
+    u.rate=.92; u.pitch=.85;                // slow + slightly low; .78 drifted into drunk-robot territory
     u.onend=u.onerror=function(){ if(curUtter===u){ curUtter=null; level=0; } };
     curUtter=u; speechSynthesis.speak(u); fakePump();
   }
@@ -749,7 +760,7 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
   function setEnabled(on,fromUser){
     enabled=on;
     try{ localStorage.setItem('nova-voice',on?'on':'off'); }catch(e){}
-    if(on){ initCtx(); if(ctx&&ctx.state==='suspended') ctx.resume(); if(fromUser) speak('greeting'); }
+    if(on){ initCtx(); if(ctx&&ctx.state==='suspended') ctx.resume(); try{ dispatchEvent(new Event('nova-voice-enabled')); }catch(e){} if(fromUser) speak('greeting'); }
     else stop();
     setUI();
   }
@@ -874,7 +885,10 @@ footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-s
 <!-- Supernova particle overlay, pre-rendered glow sprites + additive blending, no shadowBlur -->
 <!-- GPU 3D supernova overlay (Three.js shader), screen-blended over the looping video -->
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" }}
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
 </script>
 <script type="module">
 const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -1008,6 +1022,96 @@ if (!reduced && !saveData) try {
   requestAnimationFrame(loop);
   document.addEventListener('visibilitychange', ()=>{ running=!document.hidden; if(running && !disabled) requestAnimationFrame(loop); });
 } catch(err){ console.warn('Nova GPU overlay unavailable:', err); }
+</script>
+
+<!-- Holographic AI head — materializes while the voice guide speaks, dissolves when it stops.
+     Lazy: the 405KB head mesh + loader only fetch after a visitor enables the guide.
+     Head scan: "Lee Perry-Smith" by Infinite Realities (ir-ltd.net), CC-BY 3.0. -->
+<script type="module">
+const holoReduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+const holoSave = !!(navigator.connection && navigator.connection.saveData);
+if (!holoReduced && !holoSave && innerWidth >= 700) {
+  let started = false;
+  const boot = async () => {
+    if (started) return; started = true;
+    try {
+      const THREE = await import('three');
+      const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      const canvas = document.getElementById('holo');
+      const wrap = document.getElementById('holoWrap');
+      const SIZE = Math.min(320, innerWidth * 0.3);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(SIZE, SIZE);
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(32, 1, .1, 50); cam.position.set(0, .1, 9);
+
+      const uni = { uTime:{value:0}, uLevel:{value:0}, uOn:{value:0} };
+      const mat = new THREE.ShaderMaterial({
+        uniforms: uni, transparent:true, depthWrite:false,
+        blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+        vertexShader:`
+          uniform float uTime, uOn, uLevel;
+          varying vec3 vN; varying vec3 vP; varying vec3 vW;
+          float h(float n){ return fract(sin(n)*43758.5453); }
+          void main(){
+            vN = normalMatrix * normal; vP = position;
+            vec3 p = position;
+            float band = floor((p.y + 4.0) * 6.0);                    // glitch: occasional horizontal slice shear
+            float g = step(.965, h(band + floor(uTime*9.0)));
+            p.x += g * (h(band*1.7 + floor(uTime*9.0)) - .5) * .22;
+            p += normal * (h(p.y*40.0 + floor(uTime*30.0)) - .5) * .025 * uLevel;  // speech micro-jitter
+            vec4 w = modelMatrix * vec4(p, 1.0); vW = w.xyz;
+            gl_Position = projectionMatrix * viewMatrix * w;
+          }`,
+        fragmentShader:`
+          precision highp float;
+          uniform float uTime, uOn, uLevel;
+          varying vec3 vN; varying vec3 vP; varying vec3 vW;
+          float h2(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }
+          void main(){
+            vec3 n = normalize(vN);
+            float fres = pow(1.0 - abs(n.z), 1.6);                    // ghost-shell rim light
+            float scan  = .62 + .38*sin(vW.y*40.0 - uTime*5.0);       // slow rolling scan band
+            float lines = .76 + .24*sin(vW.y*230.0);                  // fine hologram raster
+            float flick = .88 + .12*sin(uTime*43.0)*sin(uTime*29.7);  // projector instability
+            float diss  = smoothstep(uOn*1.35-.35, uOn*1.35, h2(floor(vP.xy*12.0)));  // materialize dissolve
+            vec3 cyan = vec3(.25,.78,1.0), violet = vec3(.62,.45,1.0);
+            vec3 col  = mix(cyan, violet, .5+.5*sin(vW.y*.7 + uTime*.4));
+            float a = (fres*1.15 + .12) * scan * lines * flick * uOn * (.7 + .6*uLevel) * (1.0 - diss);
+            gl_FragColor = vec4(col*(1.25 + uLevel*.8), a);
+          }`
+      });
+
+      const gltf = await new GLTFLoader().loadAsync('/holo-head.glb');
+      let src = null; gltf.scene.traverse(o => { if (o.isMesh && !src) src = o; });
+      src.geometry.center();
+      src.geometry.computeBoundingBox();
+      const sz = new THREE.Vector3(); src.geometry.boundingBox.getSize(sz);
+      const mesh = new THREE.Mesh(src.geometry, mat);
+      mesh.scale.setScalar(4.7 / sz.y);
+      scene.add(mesh);
+
+      const clock = new THREE.Clock();
+      let on = 0;
+      (function loop(){
+        requestAnimationFrame(loop);
+        const t = clock.getElapsedTime();
+        const speaking = window.__novaVoiceSpeaking && window.__novaVoiceSpeaking();
+        const lvl = window.__novaVoiceLevel ? window.__novaVoiceLevel() : 0;
+        on += ((speaking ? 1 : 0) - on) * (speaking ? .06 : .022);     // fast materialize, slow dissolve
+        uni.uOn.value = on; uni.uTime.value = t;
+        uni.uLevel.value += (lvl - uni.uLevel.value) * .3;
+        mesh.rotation.y = Math.sin(t*.4)*.35;                          // slowly looks around
+        mesh.rotation.x = Math.sin(t*.23)*.08 + uni.uLevel.value*.06;  // tiny nod while speaking
+        wrap.classList.toggle('live', on > .02);
+        if (on > .01 && !document.hidden) renderer.render(scene, cam);
+      })();
+    } catch(e){ console.warn('Hologram unavailable:', e); }
+  };
+  addEventListener('nova-voice-enabled', boot, { once:true });
+  try { if (localStorage.getItem('nova-voice') === 'on') addEventListener('pointerdown', () => setTimeout(boot, 300), { once:true }); } catch(e){}
+}
 </script>
 
 <!-- DMT bloom: colored glow burst on tap/click — transient, GPU-cheap (transform+opacity), reduced-motion safe -->

@@ -463,7 +463,7 @@ sel.addEventListener('change',()=>{
     if(!('speechSynthesis' in window)) return;
     var u=new SpeechSynthesisUtterance(LINES[id]);
     var v=pickVoice(); if(v) u.voice=v;
-    u.rate=.92; u.pitch=.78;
+    u.rate=.92; u.pitch=.85;
     u.onend=u.onerror=function(){ if(curUtter===u) curUtter=null; };
     curUtter=u; speechSynthesis.speak(u);
   }

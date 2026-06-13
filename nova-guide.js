@@ -77,8 +77,7 @@
       '#ng-fab.show{display:grid}#ng-fab:hover{transform:translateY(-2px);color:#eef2ff}'+
       '#ng-fab.on{color:#ffd76b;border-color:rgba(255,215,107,.5);box-shadow:0 0 18px rgba(255,215,107,.25)}'+
       '#ng-fab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'+
-      '@media(max-width:700px){#ng-holo-wrap{display:none}}'+
-      '@media(max-width:600px){#ng-fab{bottom:84px}}'+
+      '@media(max-width:700px){#ng-holo-wrap{width:148px;right:6px;bottom:150px}}'+
       '@media(prefers-reduced-motion:reduce){#ng-holo-wrap{display:none}}';
     document.head.appendChild(css);
   }
@@ -240,18 +239,20 @@
     if(holoBooted) return; holoBooted=true;
     var reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
     var save = !!(navigator.connection && navigator.connection.saveData);
-    if(reduced || save || innerWidth < 700) return;
+    if(reduced || save) return;
     (async function(){
       try{
         var THREE = await import('three');
         var GL = await import('three/addons/loaders/GLTFLoader.js');
-        var SIZE = Math.min(340, innerWidth*0.32);
+        var phone = innerWidth < 700;
+        var SIZE = phone ? Math.min(150, innerWidth*0.42) : Math.min(340, innerWidth*0.32);
+        var DPR = Math.min(devicePixelRatio, phone ? 1.5 : 2);
         var renderer = new THREE.WebGLRenderer({ canvas:holoCanvas, alpha:true, antialias:true });
-        renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+        renderer.setPixelRatio(DPR);
         renderer.setSize(SIZE,SIZE);
         var scene=new THREE.Scene();
         var cam=new THREE.PerspectiveCamera(32,1,.1,50); cam.position.set(0,.1,9);
-        var PIX=SIZE*Math.min(devicePixelRatio,2);
+        var PIX=SIZE*DPR;
         var uni={ uTime:{value:0}, uLevel:{value:0}, uOn:{value:0}, uPix:{value:PIX} };
 
         var headMat=new THREE.ShaderMaterial({
@@ -312,7 +313,7 @@
         var gltf=await new GL.GLTFLoader().loadAsync('/holo-head.glb');
         var src=null; gltf.scene.traverse(function(o){ if(o.isMesh&&!src) src=o; });
         var pos=src.geometry.attributes.position, nrm=src.geometry.attributes.normal;
-        var total=pos.count, stride=total>26000?Math.ceil(total/26000):1;
+        var CAP=phone?12000:26000, total=pos.count, stride=total>CAP?Math.ceil(total/CAP):1;
         var P=[],N=[],S=[];
         for(var i=0;i<total;i+=stride){
           P.push(pos.getX(i),pos.getY(i),pos.getZ(i));

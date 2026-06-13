@@ -409,108 +409,6 @@ sel.addEventListener('change',()=>{
   setTimeout(()=>{ swap(); requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('swapping'))); },320);
 });
 
-/* ── AI tour: the receptionist pitches the demo — what you get & how it lands
-   you more clients. Same hybrid engine as nova.html (cinematic /voice/ MP3s
-   through a live reverb chain when present, browser voice otherwise), and the
-   same shared on/off preference, so a visitor who enabled the guide on the
-   main page gets greeted here automatically on their first tap. */
-(function(){
-  var LINES={
-    'demo-greeting':"This whole site? Yours in forty-eight hours — with me on your phones, answering the calls you miss and booking the jobs. That's how you land more clients. Scroll — I'll show you.",
-    'demo-services':"Your services, front and center — so Google finds you, and customers pick you.",
-    'demo-why':"While you're on a job, I'm on the phones. Every missed call becomes a booked one.",
-    'demo-reviews':"Happy customers leave reviews. Reviews bring the next one. The cycle feeds itself.",
-    'demo-book':"Like what you see? One flat fee — live in forty-eight hours. Or call the number, and ask me yourself."
-  };
-  var SECTIONS={services:'demo-services',why:'demo-why',reviews:'demo-reviews',book:'demo-book'};
-  var enabled=false, ctx=null, useFiles=false, buffers={}, spoken={}, curSrc=null, curUtter=null;
-
-  fetch('/voice/demo-greeting.mp3',{method:'HEAD'}).then(function(r){ useFiles=!!r.ok; }).catch(function(){});
-
-  function initCtx(){
-    if(ctx) return;
-    var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
-    ctx=new AC();
-    var rate=ctx.sampleRate, len=Math.floor(rate*2.6), ir=ctx.createBuffer(2,len,rate);
-    for(var ch=0;ch<2;ch++){ var d=ir.getChannelData(ch); for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2); }
-    var master=ctx.createGain(); master.gain.value=.9;
-    var conv=ctx.createConvolver(); conv.buffer=ir;
-    var wet=ctx.createGain(); wet.gain.value=.5;
-    var dry=ctx.createGain(); dry.gain.value=.8;
-    var dl=ctx.createDelay(1); dl.delayTime.value=.27;
-    var fb=ctx.createGain(); fb.gain.value=.28; dl.connect(fb); fb.connect(dl);
-    conv.connect(wet); wet.connect(master); dl.connect(master); dry.connect(master); master.connect(ctx.destination);
-    ctx.__in=function(n){ n.connect(dry); n.connect(conv); n.connect(dl); };
-    if('speechSynthesis' in window) speechSynthesis.getVoices();
-  }
-  function stop(){
-    if(curSrc){ try{curSrc.stop();}catch(e){} curSrc=null; }
-    if('speechSynthesis' in window) speechSynthesis.cancel();
-    curUtter=null;
-  }
-  function pickVoice(){
-    var vs=speechSynthesis.getVoices(), best=null,
-        want=['aria','jenny','guy','google us english','samantha','daniel'];
-    for(var i=0;i<vs.length;i++){ var v=vs[i];
-      if((v.lang||'').indexOf('en')!==0) continue;
-      if(!best) best=v;
-      var n=v.name.toLowerCase();
-      for(var j=0;j<want.length;j++) if(n.indexOf(want[j])>-1) return v;
-    }
-    return best;
-  }
-  function speakSynth(id){
-    if(!('speechSynthesis' in window)) return;
-    var u=new SpeechSynthesisUtterance(LINES[id]);
-    var v=pickVoice(); if(v) u.voice=v;
-    u.rate=.92; u.pitch=.85;
-    u.onend=u.onerror=function(){ if(curUtter===u) curUtter=null; };
-    curUtter=u; speechSynthesis.speak(u);
-  }
-  function speak(id){
-    if(!enabled || !LINES[id] || spoken[id]) return;
-    spoken[id]=true; stop();
-    if(useFiles && ctx){
-      var go=function(buf){ var s=ctx.createBufferSource(); s.buffer=buf; ctx.__in(s);
-        curSrc=s; s.onended=function(){ if(curSrc===s) curSrc=null; }; s.start(); };
-      if(buffers[id]) return go(buffers[id]);
-      fetch('/voice/'+id+'.mp3').then(function(r){ if(!r.ok) throw 0; return r.arrayBuffer(); })
-        .then(function(ab){ return ctx.decodeAudioData(ab); })
-        .then(function(buf){ buffers[id]=buf; go(buf); })
-        .catch(function(){ speakSynth(id); });
-    } else speakSynth(id);
-  }
-
-  var pill=document.getElementById('vgPill'), fab=document.getElementById('vgFab');
-  function setUI(){
-    var pref=null; try{ pref=localStorage.getItem('nova-voice'); }catch(e){}
-    if(pill){ pill.setAttribute('aria-pressed',String(enabled)); pill.classList.toggle('on',enabled);
-      pill.querySelector('.vg-t').textContent=enabled?'Tour on — mute':'AI tour'; }
-    if(fab){ fab.classList.toggle('show',enabled||!!pref); fab.classList.toggle('on',enabled);
-      fab.setAttribute('aria-pressed',String(enabled));
-      fab.setAttribute('aria-label',enabled?'Mute AI tour':'Unmute AI tour'); }
-  }
-  function setEnabled(on,fromUser){
-    enabled=on;
-    try{ localStorage.setItem('nova-voice',on?'on':'off'); }catch(e){}
-    if(on){ initCtx(); if(ctx&&ctx.state==='suspended') ctx.resume(); if(fromUser) speak('demo-greeting'); }
-    else stop();
-    setUI();
-  }
-  if(pill) pill.addEventListener('click',function(){ setEnabled(!enabled,true); });
-  if(fab) fab.addEventListener('click',function(){ setEnabled(!enabled,true); });
-
-  // Guide already on (from the main page)? Arm on the first tap and pitch the demo.
-  var pref=null; try{ pref=localStorage.getItem('nova-voice'); }catch(e){}
-  if(pref==='on') addEventListener('pointerdown',function(){ if(!enabled) setEnabled(true,true); },{once:true,passive:true});
-  setUI();
-
-  if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ var id=SECTIONS[en.target.id]; if(en.isIntersecting&&id) speak(id); }); },{threshold:.3});
-    Object.keys(SECTIONS).forEach(function(sid){ var el=document.getElementById(sid); if(el) io.observe(el); });
-  }
-  document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); });
-})();
 
 // Scroll reveals — staggered, IntersectionObserver-driven, reduced-motion safe
 function wireReveals(instant){
@@ -528,5 +426,14 @@ function wireReveals(instant){
 }
 wireReveals(false);
 </script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<!-- Shared AI guide: pitches the demo + holographic head, follows the visitor across pages -->
+<script src="/nova-guide.js" data-page="demo"></script>
 </body>
 </html>

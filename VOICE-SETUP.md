@@ -40,6 +40,17 @@ And 5 more for the trade demo sites (`demo-site.html` — the "AI tour"):
 | `demo-reviews.mp3` | Happy customers leave reviews. Reviews bring the next one. The cycle feeds itself. |
 | `demo-book.mp3` | Like what you see? One flat fee — live in forty-eight hours. Or call the number, and ask me yourself. |
 
+And 4 more so the guide speaks on the About, Get-Started, and call-log pages too:
+
+| File | Line |
+|---|---|
+| `about-greeting.mp3` | I'm Nova — and William built me to make sure your business never misses another call. Scroll, and meet the human behind me. |
+| `about-cta.mp3` | Ready when you are. Book a free call — and let's light your business up. |
+| `gs-greeting.mp3` | Smart move. Tell me about your business below, and your free preview lands within forty-eight hours. I'll take it from here. |
+| `d2-greeting.mp3` | This is every call I caught while the owner was busy. Each one's a customer that didn't slip away. Imagine this, for your shop. |
+
+(17 files total. The guide + hologram now live in one shared file, `nova-guide.js`, loaded on every page — so a visitor who turns the guide on keeps it, and the head, as they move from page to page.)
+
 ## Step 2 — Drop them in
 
 Create a folder named `voice` in the repo root and put the 8 MP3s inside:

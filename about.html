@@ -300,5 +300,14 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
   v.load(); go();
 })();
 </script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<!-- Shared AI guide: opt-in voice + holographic head, follows the visitor across pages -->
+<script src="/nova-guide.js" data-page="about"></script>
 </body>
 </html>

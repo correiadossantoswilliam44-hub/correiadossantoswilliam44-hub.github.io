@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
 <title>Lead Inbox · Supernova</title>
 <meta name="robots" content="noindex,nofollow"/>
 <link rel="icon" type="image/svg+xml" href="/logo.svg"/>
@@ -163,6 +165,9 @@ main{padding:26px 0 70px}
   var allLeads = [], filter = 'all', query = '';
 
   var esc = function(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+  // A lead's "current site" is attacker-controllable (anyone can INSERT via the public anon key).
+  // Only let genuine http(s) URLs become clickable; javascript:/data:/etc. render as inert text.
+  var safeUrl = function(u){ try{ var p=new URL(String(u), location.origin); return (p.protocol==='http:'||p.protocol==='https:') ? p.href : null; }catch(e){ return null; } };
   var when = function(iso){ var d=new Date(iso), now=new Date(), ms=now-d, day=864e5;
     if(ms<6e4) return 'just now';
     if(ms<36e5) return Math.floor(ms/6e4)+'m ago';
@@ -216,22 +221,24 @@ main{padding:26px 0 70px}
     box.innerHTML=rows.map(function(l){
       var opts=STATUSES.map(function(s){return '<option value="'+s[0]+'"'+(l.status===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('');
       var site = l.has_website && /yes/i.test(l.has_website);
+      var stClass = LABEL[l.status] ? l.status : 'new';          // whitelist status before using it as a CSS class
+      var curUrl = (site && l.current_site) ? safeUrl(l.current_site) : null;
       var kv=[
         l.phone ? '<div class="kv"><span class="k">Phone</span><a href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a></div>' : '',
         l.email ? '<div class="kv"><span class="k">Email</span><a href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a></div>' : '',
         '<div class="kv"><span class="k">Has a site?</span>'+(site?'Yes — rebuild':'No — new build')+'</div>',
-        (site && l.current_site) ? '<div class="kv"><span class="k">Current site</span><a href="'+esc(l.current_site)+'" target="_blank" rel="noopener">'+esc(l.current_site)+'</a></div>' : ''
+        (site && l.current_site) ? '<div class="kv"><span class="k">Current site</span>'+(curUrl?'<a href="'+esc(curUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(l.current_site)+'</a>':esc(l.current_site))+'</div>' : ''
       ].join('');
-      return '<div class="lead" data-id="'+l.id+'">'+
+      return '<div class="lead" data-id="'+esc(l.id)+'">'+
         '<div class="lead-top"><div><h3>'+esc(l.business_name||'(no name)')+'</h3>'+
           '<div class="sub">'+esc(l.trade||'—')+(l.location?' · '+esc(l.location):'')+'</div></div>'+
-          '<div style="display:flex;align-items:center;gap:10px"><span class="badge '+l.status+'">'+esc(LABEL[l.status]||l.status)+'</span><span class="when">'+when(l.created_at)+'</span></div>'+
+          '<div style="display:flex;align-items:center;gap:10px"><span class="badge '+esc(stClass)+'">'+esc(LABEL[l.status]||l.status)+'</span><span class="when">'+when(l.created_at)+'</span></div>'+
         '</div>'+
         '<div class="lead-grid">'+kv+'</div>'+
         (l.notes ? '<div class="notes"><span class="k">Notes</span>'+esc(l.notes)+'</div>' : '')+
         '<div class="photos" data-photos=\''+esc(JSON.stringify(l.photo_paths||[]))+'\'></div>'+
-        '<div class="lead-actions"><select data-id="'+l.id+'">'+opts+'</select>'+
-          '<button class="del" data-id="'+l.id+'">Delete</button></div>'+
+        '<div class="lead-actions"><select data-id="'+esc(l.id)+'">'+opts+'</select>'+
+          '<button class="del" data-id="'+esc(l.id)+'">Delete</button></div>'+
       '</div>';
     }).join('');
 

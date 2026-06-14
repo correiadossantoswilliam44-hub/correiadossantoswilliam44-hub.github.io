@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self' https://formsubmit.co"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
 <title>Get Your Free Website Preview — Supernova</title>
 <meta name="description" content="Tell us about your business and we'll build you a free preview of your new website — live in 48 hours. No cost, no commitment."/>
 <meta name="robots" content="noindex"/>
@@ -223,10 +225,13 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       btn.disabled=true; btn.textContent='Sending…';
       try{
         var fd=new FormData(form);
-        // best-effort photo upload to private storage
-        var files=(form.querySelector('input[type=file]')||{}).files||[], paths=[];
-        for(var i=0;i<files.length;i++){
+        // best-effort photo upload to private storage. Client-side guard (images only,
+        // <=8MB, max 10); the Supabase bucket also enforces type+size server-side, and the
+        // filename is randomized + stripped to [\w.-] so it can't traverse paths or inject.
+        var files=(form.querySelector('input[type=file]')||{}).files||[], paths=[], MAX=8*1024*1024;
+        for(var i=0;i<files.length && paths.length<10;i++){
           var f=files[i];
+          if(!/^image\//.test(f.type||'') || f.size>MAX) continue;   // skip non-images / oversized
           var path=Date.now()+'-'+Math.random().toString(36).slice(2)+'-'+f.name.replace(/[^\w.\-]+/g,'_');
           var up=await sb.storage.from('lead-photos').upload(path, f, {contentType:f.type||'image/jpeg'});
           if(!up.error) paths.push(path);

@@ -60,9 +60,14 @@ create policy "authed can delete leads" on public.leads
   using ((auth.jwt()->>'email') = 'correiadossantoswilliam44@gmail.com');
 
 -- Storage bucket for uploaded work photos (private; viewed via signed URLs) ---
-insert into storage.buckets (id, name, public)
-  values ('lead-photos','lead-photos',false)
-  on conflict (id) do nothing;
+-- file_size_limit + allowed_mime_types enforce upload limits SERVER-SIDE, so a
+-- crafted client using the public anon key still can't store non-images or huge files.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values ('lead-photos','lead-photos',false, 8388608,
+          array['image/jpeg','image/png','image/webp','image/gif','image/heic','image/heif'])
+  on conflict (id) do update
+    set file_size_limit    = excluded.file_size_limit,
+        allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "anon can upload lead photos" on storage.objects;
 create policy "anon can upload lead photos" on storage.objects

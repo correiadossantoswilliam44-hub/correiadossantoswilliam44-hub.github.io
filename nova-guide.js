@@ -70,7 +70,8 @@
     css.textContent =
       '#ng-holo-wrap{position:fixed;right:22px;bottom:86px;z-index:44;width:min(340px,32vw);aspect-ratio:1;pointer-events:none;opacity:0;transition:opacity .7s cubic-bezier(.16,1,.3,1)}'+
       '#ng-holo-wrap.live{opacity:1}'+
-      '#ng-holo-wrap::after{content:"";position:absolute;left:50%;bottom:-38px;width:62%;height:70px;transform:translateX(-50%);background:radial-gradient(50% 100% at 50% 0%,rgba(80,200,255,.32),transparent 72%);filter:blur(2px);animation:ngbeam 2.7s ease-in-out infinite}'+
+      '#ng-holo-wrap::before{content:"";position:absolute;inset:-10% -8% -4% -8%;z-index:-1;border-radius:50%;background:radial-gradient(60% 60% at 50% 46%,rgba(2,5,16,.85),rgba(2,5,16,.5) 50%,transparent 76%)}'+
+      '#ng-holo-wrap::after{content:"";position:absolute;left:50%;bottom:-34px;width:58%;height:64px;transform:translateX(-50%);background:radial-gradient(50% 100% at 50% 0%,rgba(80,200,255,.28),transparent 72%);filter:blur(2px);animation:ngbeam 3.4s ease-in-out infinite}'+
       '@keyframes ngbeam{0%,100%{opacity:.7}43%{opacity:1}61%{opacity:.5}}'+
       '#ng-holo{width:100%;height:100%;display:block}'+
       '#ng-fab{position:fixed;right:18px;bottom:18px;z-index:47;width:46px;height:46px;border-radius:50%;display:none;place-items:center;border:1px solid rgba(255,255,255,.16);background:rgba(7,10,24,.85);color:#9aa6c8;cursor:pointer;backdrop-filter:blur(10px);transition:color .25s,border-color .25s,transform .25s cubic-bezier(.16,1,.3,1)}'+
@@ -152,15 +153,20 @@
     curUtter=null; level=0;
   }
   function pickVoice(){
-    var vs=speechSynthesis.getVoices(), best=null,
-        want=['aria','jenny','guy','google us english','samantha','daniel'];
+    // Prefer a confident FEMALE voice (the brand voice). The real voice is the
+    // ElevenLabs file when present; this only steers the browser fallback.
+    var vs=speechSynthesis.getVoices(), best=null, femaleFallback=null,
+        want=['samantha','victoria','serena','aria','jenny','michelle','sonia',
+              'google uk english female','zira','karen','moira','tessa','fiona','female'],
+        male=/(guy|daniel|david|mark|alex|fred|male|george|james|aaron|arthur|oliver)/;
     for(var i=0;i<vs.length;i++){ var v=vs[i];
       if((v.lang||'').indexOf('en')!==0) continue;
       if(!best) best=v;
       var n=v.name.toLowerCase();
+      if(!femaleFallback && !male.test(n)) femaleFallback=v;
       for(var j=0;j<want.length;j++) if(n.indexOf(want[j])>-1) return v;
     }
-    return best;
+    return femaleFallback||best;
   }
   function speakSynth(id){
     if(!('speechSynthesis' in window)) return;
@@ -286,9 +292,15 @@
           }));
         }
 
-        function buildImage(tex){
+        // Renders the face IMAGE or, if a talking-head VIDEO was provided, the video
+        // (real mouth/eye/head movement). vid is null for a still image. The image
+        // already carries its own ring + bokeh, so we add NO extra particles here —
+        // just a calm hologram shimmer, a dark backing (CSS), breathing + head sway.
+        function buildImage(tex, vid){
           tex.colorSpace=THREE.SRGBColorSpace;
-          var iw=(tex.image&&tex.image.width)||16, ih=(tex.image&&tex.image.height)||9, aspect=iw/ih;
+          var iw = vid ? (vid.videoWidth||16) : ((tex.image&&tex.image.width)||16);
+          var ih = vid ? (vid.videoHeight||9) : ((tex.image&&tex.image.height)||9);
+          var aspect=iw/ih;
           var group=new THREE.Group(); scene.add(group);
           var plane=new THREE.Mesh(new THREE.PlaneGeometry(aspect,1), new THREE.ShaderMaterial({
             uniforms:Object.assign({uTex:{value:tex}}, uni), transparent:true, depthWrite:false,
@@ -296,47 +308,36 @@
             fragmentShader:`precision highp float; uniform sampler2D uTex; uniform float uTime,uOn,uLevel; varying vec2 vUv;
               float hsh(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
               void main(){
-                vec2 uv=vUv; float ca=.003*(1.0+uLevel*2.5);
+                vec2 uv=vUv;
+                float ca=.0013*(1.0+uLevel*1.6);                 // subtle chroma (was harsh/noisy)
                 vec3 c; c.r=texture2D(uTex,uv+vec2(ca,0.)).r; c.g=texture2D(uTex,uv).g; c.b=texture2D(uTex,uv-vec2(ca,0.)).b;
                 float lum=dot(c,vec3(.299,.587,.114));
-                vec3 col=mix(c, vec3(.32,.85,1.25)*lum*1.4, .35);
-                col+=vec3(.1,.42,.72)*lum*uLevel;
-                float scan=.86+.14*sin(uv.y*700.0);
-                float band=.92+.08*sin(uv.y*10.0-uTime*3.0);
-                float flick=.93+.07*sin(uTime*40.0)*sin(uTime*27.0);
-                col*=scan*band*flick;
-                float a=smoothstep(.06,.30,lum);
-                a*=smoothstep(uOn*1.12,uOn*1.12-.22,hsh(floor(uv*150.0)));
+                vec3 col=mix(c, vec3(.42,.86,1.2)*lum*1.22, .20);  // gentle cyan grade, keep the render's detail
+                col+=vec3(.07,.32,.58)*lum*uLevel;                // glow swells with the voice
+                float scan=.94+.06*sin(uv.y*430.0);               // faint scanlines
+                float band=.96+.04*sin(uv.y*8.0-uTime*2.2);
+                float flick=.965+.035*sin(uTime*36.0)*sin(uTime*22.0);
+                float blink=1.0-.5*step(.9965,hsh(vec2(floor(uTime*11.0),3.0)));  // rare hologram-blink dip
+                col*=scan*band*flick*blink;
+                float a=smoothstep(.05,.26,lum);                  // dark bg keyed out -> floats
+                a*=smoothstep(uOn*1.1,uOn*1.1-.2,hsh(floor(uv*120.0)));  // materialize
                 a*=uOn; if(a<.004) discard;
-                gl_FragColor=vec4(col*(1.05+uLevel*.6), a);
+                gl_FragColor=vec4(col*(1.0+uLevel*.5), a);
               }`
           }));
           var visH=2.0*Math.tan(cam.fov*Math.PI/360)*cam.position.z;
           var s=Math.min(visH/aspect, visH)*0.98; plane.scale.set(s,s,1); group.add(plane);
-          var ring=ringPoints(); ring.position.set(.15,0,-.4); group.add(ring);
-          var PN=phone?40:90, PP=[],PS=[];
-          for(var i=0;i<PN;i++){ PP.push((Math.random()-.5)*5.0,(Math.random()-.5)*5.0,(Math.random()-.5)*2.2-.6); PS.push(Math.random()); }
-          var pg=new THREE.BufferGeometry();
-          pg.setAttribute('position',new THREE.Float32BufferAttribute(PP,3));
-          pg.setAttribute('aSeed',new THREE.Float32BufferAttribute(PS,1));
-          var parts=new THREE.Points(pg, new THREE.ShaderMaterial({
-            uniforms:uni, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
-            vertexShader:`uniform float uTime,uOn,uLevel,uPix; attribute float aSeed; varying float vS;
-              void main(){ vS=aSeed; vec3 p=position; p.y=mod(p.y+uTime*(.2+aSeed*.3)+2.5,5.0)-2.5;
-              vec4 mv=modelViewMatrix*vec4(p,1.0);
-              gl_PointSize=max((1.0+3.0*aSeed)*(1.0+uLevel)*uOn*uPix*.01/max(-mv.z,.1),0.0);
-              gl_Position=projectionMatrix*mv; }`,
-            fragmentShader:`precision highp float; uniform float uOn,uTime; varying float vS;
-              void main(){ float d=length(gl_PointCoord-.5); float disc=smoothstep(.5,.0,d);
-              float tw=.6+.4*sin(uTime*3.0+vS*40.0);
-              vec3 col=mix(vec3(.3,.8,1.0),vec3(1.0,.6,.3),step(.82,vS));
-              gl_FragColor=vec4(col,disc*uOn*tw*(.25+.5*vS)); }`
-          }));
-          group.add(parts);
           scene.userData.update=function(t,_px,_py){
-            group.rotation.y=_px*.45; group.rotation.x=-_py*.28;
-            group.position.x=_px*.5; group.position.y=Math.sin(t*.6)*.06-_py*.3;
-            ring.rotation.z=t*.25;
+            var sp = window.__novaVoiceSpeaking && window.__novaVoiceSpeaking();
+            group.rotation.y = _px*.32 + Math.sin(t*.5)*.045;     // pointer/tilt sway + idle drift
+            group.rotation.x = -_py*.2 + Math.sin(t*.37)*.022;
+            group.scale.setScalar(1 + Math.sin(t*1.05)*.012 + uni.uLevel.value*.045);  // breathing + speech swell
+            group.position.x = _px*.35;
+            group.position.y = Math.sin(t*.6)*.035 - _py*.2;
+            if(vid){                                              // talking-head video: play while speaking, freeze when idle
+              if(sp && uni.uOn.value>.25){ if(vid.paused){ var pr=vid.play(); if(pr&&pr.catch) pr.catch(function(){}); } }
+              else if(!vid.paused){ vid.pause(); }
+            }
           };
         }
 
@@ -390,9 +391,25 @@
             ring.rotation.z=t*.25; };
         }
 
-        var tex=null;
-        for(var ii=0; ii<IMGS.length && !tex; ii++){ try{ tex=await new THREE.TextureLoader().loadAsync(IMGS[ii]); }catch(e){} }
-        if(tex) buildImage(tex); else await buildPoints();
+        // 1) talking-head VIDEO (real lip-sync) if present, else 2) the still face image,
+        //    else 3) the procedural point cloud.
+        var built=false;
+        var VIDS=['/holo-face.webm','/holo-face.mp4'];
+        for(var vi=0; vi<VIDS.length && !built; vi++){
+          var vid=document.createElement('video');
+          vid.muted=true; vid.loop=true; vid.playsInline=true; vid.setAttribute('playsinline',''); vid.preload='auto';
+          var ok=await new Promise(function(res){ var done=false;
+            vid.addEventListener('loadeddata',function(){ if(!done){done=true;res(true);} },{once:true});
+            vid.addEventListener('error',function(){ if(!done){done=true;res(false);} },{once:true});
+            vid.src=VIDS[vi]; vid.load();
+          });
+          if(ok){ buildImage(new THREE.VideoTexture(vid), vid); built=true; }
+        }
+        if(!built){
+          var tex=null;
+          for(var ii=0; ii<IMGS.length && !tex; ii++){ try{ tex=await new THREE.TextureLoader().loadAsync(IMGS[ii]); }catch(e){} }
+          if(tex) buildImage(tex, null); else await buildPoints();
+        }
 
         var clock=new THREE.Clock(), on=0;
         (function loop(){

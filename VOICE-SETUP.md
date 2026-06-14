@@ -11,8 +11,9 @@ entire script about five times over. It's a one-time generation.
 ## Step 1 — Generate the lines (~10 min)
 
 1. Go to **https://elevenlabs.io** → sign up free → **Text to Speech**.
-2. Pick a deep, calm voice — **Brian**, **Adam**, or **Charlotte** work well.
-3. Settings: **Stability ~35%**, **Similarity ~80%**, **Style ~15%**.
+2. Pick a **confident female** voice — **Charlotte**, **Jessica**, **Matilda**,
+   or **Rachel** all read confident and warm. (This is the brand voice.)
+3. Settings: **Stability ~40%**, **Similarity ~85%**, **Style ~20%**.
    Keep speed slightly slow if available.
 4. ⚠️ Generate the lines **dry — no echo or reverb**. The website adds the
    cavernous Blade-Runner reverb live, in the browser. Baked-in echo would
@@ -50,6 +51,26 @@ And 4 more so the guide speaks on the About, Get-Started, and call-log pages too
 | `d2-greeting.mp3` | This is every call I caught while the owner was busy. Each one's a customer that didn't slip away. Imagine this, for your shop. |
 
 (17 files total. The guide + hologram now live in one shared file, `nova-guide.js`, loaded on every page — so a visitor who turns the guide on keeps it, and the head, as they move from page to page.)
+
+---
+
+## Optional — make the hologram's MOUTH actually move (talking-head video)
+
+The still image can't truly lip-sync — a flat picture has no mouth rig. To get
+the face **moving its mouth/eyes/head while it speaks**, generate a short
+**talking-head video** of the face and drop it in as **`holo-face.mp4`** (or
+`.webm`) in the repo root. The hologram auto-detects it, plays it **while the
+voice is speaking**, and freezes on a still frame when idle — so it looks like
+it's actually talking.
+
+How to make one (pick any):
+- **D-ID** (d-id.com) or **HeyGen** (heygen.com) — upload the face image +
+  your ElevenLabs audio → it renders a lip-synced talking video. Best result.
+- **SadTalker** (free, open-source) — same idea, runs locally/Colab.
+- Keep it a tight crop of the face, dark background, a few seconds, looping.
+
+No video = the still image still works (now cleaned up: dark backing so it
+isn't washed out, calmer shimmer, breathing + head sway, audio-reactive glow).
 
 ## Step 2 — Drop them in
 
